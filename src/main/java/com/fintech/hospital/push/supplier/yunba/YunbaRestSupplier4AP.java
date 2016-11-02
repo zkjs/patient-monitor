@@ -8,16 +8,16 @@ import org.springframework.stereotype.Component;
 import static org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_SINGLETON;
 
 /**
- * <b>DO NOT MODIFY THIS FILE: this is a direct copy from URSAMAJOR, refactor needed</b>
+ * @author baoqiang
  */
-@Component("yunbaSupplier4C")
+@Component("yunbaRestSupplier4AP")
 @Scope(SCOPE_SINGLETON)
-public class YunbaSupplier4C extends YunbaSupplier {
+public class YunbaRestSupplier4AP extends YunbaRestSupplier {
 
   @Autowired
-  YunbaSupplier4C(@Value("${yunba.server.url}") String yunbaServerUrl,
-                  @Value("${yunba.appkey.c}") String yunbaAppKey) {
-    super(yunbaServerUrl, yunbaAppKey);
+  YunbaRestSupplier4AP(@Value("${yunba.server.rest.url}") String yunbaServerUrl,
+                       @Value("${yunba.appkey.ap}") String yunbaAppKey,
+                       @Value("${yunba.appsec.ap}") String yunbaAppSec) {
+    super(yunbaServerUrl, yunbaAppKey, yunbaAppSec);
   }
-
 }

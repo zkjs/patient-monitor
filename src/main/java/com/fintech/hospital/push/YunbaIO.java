@@ -1,5 +1,6 @@
 package com.fintech.hospital.push;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import io.socket.IOAcknowledge;
 import io.socket.IOCallback;
@@ -36,57 +37,64 @@ public abstract class YunbaIO implements IOCallback {
 
   @PostConstruct
   private void init() {
-    LOG.info("init yunba {} socket with key {}...", current, yunbaAppKey);
+    LOG.info("init {} socket with yunba key {}...", current, yunbaAppKey);
     this.yunbaSocket = new SocketIO();
     try {
       yunbaSocket.connect(yunbaServerUrl, this);
-      LOG.info("yunba {} socket {} connected", current, yunbaAppKey);
+      LOG.info("{} connecting server with yunba key {}...", current, yunbaAppKey);
     } catch (MalformedURLException e) {
-      LOG.error("illegal yunba {} url", current, e);
+      LOG.error("illegal {} url", current, e);
     }
-    LOG.info("yunba {} {} init done!", current, yunbaAppKey);
+    LOG.info("{} with yunba key {} init done!", current, yunbaAppKey);
   }
 
   @Override
   public void onMessage(String data, IOAcknowledge ack) {
-    LOG.info("server said : {}", data);
+    LOG.info("{} server said : {}", current, data);
   }
 
   @Override
   public void onMessage(JSONObject jsonObject, IOAcknowledge ioAcknowledge) {
-    LOG.info("server said json: {}", jsonObject);
+    LOG.info("{} server said json: {}", current, jsonObject);
   }
 
   @Override
   public void onError(SocketIOException socketIOException) {
-    LOG.warn("an {} error occurred", current, socketIOException);
+    LOG.warn("{} error occurred: {}", current, socketIOException);
     IOCallback yunbaSocketCallback = this;
-    LOG.info("re-connecting {} in 2 seconds", current);
+    LOG.info("{} re-connecting in 2 seconds", current);
     new Timer("ReconnectYunbaSocketIn2Seconds").schedule(
         new TimerTask() {
           @Override
           public void run() {
-            LOG.info("re-instantiating yunba {} socket for fresh connection", current);
+            LOG.info("{} re-instantiating for fresh connection", current);
             yunbaSocket = new SocketIO();
             try {
               yunbaSocket.connect(yunbaServerUrl, yunbaSocketCallback);
             } catch (MalformedURLException e) {
-              LOG.error("illegal yunba {} url", current, e);
+              LOG.error("illegal {} url", current, e);
             }
           }
         }
         , 2000L);
   }
 
+  protected void subscribe(String topic){
+    yunbaSocket.emit("subscribe", JSON.parseObject(String.format("{'topic': '%s'}", topic)));
+  }
+
+  protected void alias(String alias){
+    yunbaSocket.emit("set_alias", JSON.parseObject(String.format("{'alias': '%s'}", alias)));
+  }
+
   private void connect2Yunba() {
-    LOG.info("server connected, connecting to yunba for {}...", current);
     String customid = UUID.randomUUID().toString();
-        /* emit connect */
+    /* emit connect */
     JSONObject connJson = new JSONObject();
     connJson.put("appkey", yunbaAppKey);
     connJson.put("customid", customid);
     yunbaSocket.emit("connect", connJson);
-    LOG.info("yunba {} socket connected", current);
+    LOG.info("{} connected server, yunba authenticating ...", current);
   }
 
   @Override
@@ -101,7 +109,7 @@ public abstract class YunbaIO implements IOCallback {
 
   @Override
   public void on(String event, IOAcknowledge ack, Object... args) {
-    LOG.info("server {} triggered event {}", current, event);
+    LOG.debug("{} got event {}", current, event);
     try {
       switch (event) {
         case "socketconnectack":
@@ -113,6 +121,12 @@ public abstract class YunbaIO implements IOCallback {
         case "puback":
           onPubAck(args[0]);
           break;
+        case "set_alias_ack":
+          onAliasAck(args[0]);
+          break;
+        case "message":
+          onMessage((JSONObject) args[0], ack);
+          break;
         default:
           LOG.warn("{} {} cannot be handled", current, event);
           break;
@@ -122,16 +136,21 @@ public abstract class YunbaIO implements IOCallback {
     }
   }
 
-  public void onSocketConnectAck() throws Exception {
+  protected void onSocketConnectAck() throws Exception {
     LOG.info("{} onSocketConnectAck", current);
     connect2Yunba();
   }
 
-  public void onConnAck(Object json) throws Exception {
-    LOG.info("{} onConnAck success {}", current, json);
+  protected void onConnAck(Object json) throws Exception {
+    LOG.info("{} connected: {}", current, json);
   }
 
-  public void onPubAck(Object json) throws Exception {
-    LOG.info("{} conPubAck success {}", current, json);
+  protected void onPubAck(Object json) throws Exception {
+    LOG.info("{} published: {}", current, json);
   }
+
+  public void onAliasAck(Object json) throws Exception{
+    LOG.info("{} alias set: {}", current, json);
+  }
+
 }

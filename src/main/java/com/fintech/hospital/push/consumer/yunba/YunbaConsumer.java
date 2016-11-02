@@ -16,13 +16,14 @@ abstract class YunbaConsumer extends YunbaIO implements PushConsumer {
 
   @Override
   public void onMessage(String data, IOAcknowledge ack) {
-    LOG.info("server said: {}", data);
+    LOG.debug("msg: {}", data);
     consume(data);
   }
 
   @Override
   public void onMessage(JSONObject jsonObject, IOAcknowledge ioAcknowledge) {
-    LOG.info("server said: {}", jsonObject.toString());
+    LOG.debug("msg from {}: {}", jsonObject.getString("topic"), jsonObject.toString());
+    consume(jsonObject.getString("msg"));
   }
 
 

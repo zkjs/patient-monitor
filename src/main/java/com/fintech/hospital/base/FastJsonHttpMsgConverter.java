@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SerializeFilter;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alibaba.fastjson.serializer.ValueFilter;
-import org.bson.types.ObjectId;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
@@ -88,7 +87,7 @@ public class FastJsonHttpMsgConverter extends AbstractHttpMessageConverter<Objec
   }
 
   private static final ValueFilter OBJECTID_FILTER = (object, name, value) -> {
-    if (value instanceof ObjectId) return ((ObjectId) value).toHexString();
+    //if (value instanceof ObjectId) return ((ObjectId) value).toHexString();
     return value;
   };
 

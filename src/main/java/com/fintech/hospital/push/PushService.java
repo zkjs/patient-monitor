@@ -28,19 +28,19 @@ public class PushService {
   static final Logger LOG = LoggerFactory.getLogger(PushService.class);
 
   @Autowired
-  @Qualifier("yunbaSupplier4S")
+  @Qualifier("yunbaSupplier4Mon")
   private PushSupplier pushSupplier4S;
 
   @Autowired
-  @Qualifier("yunbaRestSupplier4S")
+  @Qualifier("yunbaRestSupplier4Mon")
   private PushSupplier pushRestSupplier4S;
 
   @Autowired
-  @Qualifier("yunbaSupplier4C")
+  @Qualifier("yunbaSupplier4AP")
   private PushSupplier pushSupplier4C;
 
   @Autowired
-  @Qualifier("yunbaRestSupplier4C")
+  @Qualifier("yunbaRestSupplier4AP")
   private PushSupplier pushRestSupplier4C;
 
   private ThreadLocal<Boolean> tlUsingRest = new ThreadLocal<>();
