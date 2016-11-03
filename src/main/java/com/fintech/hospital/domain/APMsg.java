@@ -1,4 +1,4 @@
-package com.fintech.hospital.ap;
+package com.fintech.hospital.domain;
 
 /**
  * @author baoqiang
@@ -7,7 +7,7 @@ public class APMsg {
 
   private String apid;
   private String payload;
-  private Short rssi;
+  private Integer rssi;
   private String bandId;
 
   private byte[] pkg;
@@ -30,30 +30,30 @@ public class APMsg {
     this.payload = payload;
     this.pkg = new byte[4];
     pkg[0] = Byte.valueOf(payload.substring(2, 4));
-    this.bandId = payload.substring(4,6);
+    this.bandId = payload.substring(4, 6);
     for (int i = 3, j = 1; i < 6; i++) {
-      pkg[j++] = Byte.valueOf(payload.substring(i*2, (i+1)*2));
+      pkg[j++] = Byte.valueOf(payload.substring(i * 2, (i + 1) * 2));
     }
   }
 
-  public String bandId(){
+  public String bracelet() {
     return bandId;
   }
 
-  public Short getRssi() {
+  public Integer getRssi() {
     return rssi;
   }
 
-  public void setRssi(Short rssi) {
+  public void setRssi(Integer rssi) {
     this.rssi = rssi;
   }
 
-  public boolean binded(){
-    return pkg[2] == 0x01;
+  public boolean binded() {
+    return pkg[2] == 1;
   }
 
-  public boolean urgent(){
-    return pkg[0] == 0x66;
+  public boolean urgent() {
+    return pkg[0] == 66;
   }
 
 }

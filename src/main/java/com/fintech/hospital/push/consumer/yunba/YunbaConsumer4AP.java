@@ -1,13 +1,25 @@
 package com.fintech.hospital.push.consumer.yunba;
 
 import com.alibaba.fastjson.JSON;
-import com.fintech.hospital.ap.APMsg;
+import com.fintech.hospital.data.Cache;
+import com.fintech.hospital.data.MongoDB;
+import com.fintech.hospital.domain.APMsg;
+import com.fintech.hospital.domain.BraceletTrace;
+import com.fintech.hospital.domain.TimedPosition;
 import com.fintech.hospital.push.PushService;
+import com.fintech.hospital.push.model.PushMsg;
+import com.fintech.hospital.push.supplier.yunba.YunbaOpts;
+import com.fintech.hospital.rssi.RssiDistanceModel;
+import com.fintech.hospital.rssi.RssiMeasure;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
+import static com.fintech.hospital.domain.TimedPosition.mean;
+import static com.fintech.hospital.push.model.PushType.BROADCAST;
+import static java.util.concurrent.CompletableFuture.runAsync;
+import static java.util.concurrent.CompletableFuture.supplyAsync;
 import static org.springframework.beans.factory.config.BeanDefinition.SCOPE_SINGLETON;
 
 /**
@@ -26,21 +38,66 @@ public class YunbaConsumer4AP extends YunbaConsumer {
   @Autowired
   private PushService pushService;
 
+  @Autowired
+  private MongoDB mongo;
+
+  @Autowired
+  private Cache cache;
+
+  final RssiDistanceModel RSSI_MODEL = new RssiDistanceModel(0.1820634, 0.8229884, 6.6525179, -75);
+
   @Override
   public void consume(String msg) {
-    LOG.debug("consuming ap msg... {}", msg);
+    LOG.info("consuming ap msg... {}", msg);
     APMsg apMsg = JSON.parseObject(msg, APMsg.class);
     /* categorize msg type: urgency (push to mon immediately for alert), tracing */
-    if(apMsg.urgent()){
-      LOG.info("band {} in emergency, detected by ap {}", apMsg.bandId(), apMsg.getApid());
-      //TODO push to mon for urgent band id
+    if (apMsg.urgent()) {
+      LOG.info("band {} in emergency, detected by ap {}", apMsg.bracelet(), apMsg.getApid());
+      pushService.push2Mon(new PushMsg(BROADCAST, "demo", msg, new YunbaOpts(new YunbaOpts.YunbaAps(
+          msg, apMsg.getApid() + "正在呼救"
+      ))));
     }
-    /**
-     * get rssi and cache
-     * get the last rssi for the device
-     * calculate distance to ap
-     * when detected ap reaches >= 3, try positioning the device
-     */
+
+    final long current = System.currentTimeMillis();
+    final String bracelet = apMsg.bracelet();
+
+    /* fetch ap position */
+    supplyAsync(() -> mongo.getAP(apMsg.getApid())
+    ).thenCompose(ap -> {
+      runAsync(() -> mongo.addBraceletTrace(
+          apMsg.bracelet(),
+          new BraceletTrace(apMsg.getApid(), apMsg.getRssi(), ap.getGps())
+      ));
+      /* pop all latest positions */
+      return supplyAsync(() ->
+          cache.push(bracelet, ap.getId(), new TimedPosition(ap.getGps(), current), RSSI_MODEL.distance(apMsg.getRssi()))
+      );
+    }).thenAccept(positions -> {
+      /* cache bandid, lnglatDistance and ap lnglat to list */
+      if (positions == null || positions.isEmpty()) return;
+      LOG.info("positioning bracelet {}", bracelet);
+      TimedPosition braceletPosition = null;
+      switch (positions.size()) {
+        case 1:
+          braceletPosition = positions.get(0).getKey();
+          break;
+        case 2:
+          double apDist0 = positions.get(0).getValue(),
+              apDist1 = positions.get(1).getValue(),
+              distRatio0 = apDist0 / (apDist0 + apDist1);
+          braceletPosition = mean(new TimedPosition[]{positions.get(0).getKey(), positions.get(1).getKey()},
+              new double[]{distRatio0, 1 - distRatio0});
+          break;
+        default:
+          braceletPosition = RssiMeasure.positioning(positions, bracelet);
+          break;
+      }
+      mongo.addBraceletPosition(bracelet, braceletPosition);
+      LOG.info("new position {} for bracelet {} ", braceletPosition, bracelet);
+    }).exceptionally(t -> {
+      LOG.error("Err({})...: ", bracelet, t);
+      return null;
+    });
 
   }
 

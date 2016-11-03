@@ -1,7 +1,5 @@
 package com.fintech.hospital.push;
 
-import com.alibaba.fastjson.JSONObject;
-
 /**
  * @author baoqiang
  */

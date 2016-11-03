@@ -79,11 +79,11 @@ public abstract class YunbaIO implements IOCallback {
         , 2000L);
   }
 
-  protected void subscribe(String topic){
+  protected void subscribe(String topic) {
     yunbaSocket.emit("subscribe", JSON.parseObject(String.format("{'topic': '%s'}", topic)));
   }
 
-  protected void alias(String alias){
+  protected void alias(String alias) {
     yunbaSocket.emit("set_alias", JSON.parseObject(String.format("{'alias': '%s'}", alias)));
   }
 
@@ -149,7 +149,7 @@ public abstract class YunbaIO implements IOCallback {
     LOG.info("{} published: {}", current, json);
   }
 
-  public void onAliasAck(Object json) throws Exception{
+  public void onAliasAck(Object json) throws Exception {
     LOG.info("{} alias set: {}", current, json);
   }
 

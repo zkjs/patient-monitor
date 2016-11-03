@@ -1,6 +1,5 @@
 package com.fintech.hospital.push.consumer.yunba;
 
-import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -12,7 +11,7 @@ import static org.springframework.beans.factory.config.BeanDefinition.SCOPE_SING
  */
 @Component("yunbaConsumer4Mon")
 @Scope(SCOPE_SINGLETON)
-public class YunbaConsumer4Mon extends YunbaConsumer{
+public class YunbaConsumer4Mon extends YunbaConsumer {
 
 
   YunbaConsumer4Mon(@Value("${yunba.server.url}") String yunbaServerUrl,

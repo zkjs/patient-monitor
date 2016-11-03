@@ -29,26 +29,36 @@ public class PushService {
 
   @Autowired
   @Qualifier("yunbaSupplier4Mon")
-  private PushSupplier pushSupplier4S;
+  private PushSupplier pushSupplier4Mon;
 
   @Autowired
   @Qualifier("yunbaRestSupplier4Mon")
-  private PushSupplier pushRestSupplier4S;
+  private PushSupplier pushRestSupplier4Mon;
 
   @Autowired
   @Qualifier("yunbaSupplier4AP")
-  private PushSupplier pushSupplier4C;
+  private PushSupplier pushSupplier4AP;
 
   @Autowired
   @Qualifier("yunbaRestSupplier4AP")
-  private PushSupplier pushRestSupplier4C;
+  private PushSupplier pushRestSupplier4AP;
 
   private ThreadLocal<Boolean> tlUsingRest = new ThreadLocal<>();
 
-  public void newPushTask(PushMsg msg) {
+  public void push2Mon(PushMsg msg) {
     LOG.info("pushing msg {}", msg);
     CompletableFuture.runAsync(() -> {
-      pushSupplier4S.publish(msg);
+      pushSupplier4Mon.publish(msg);
+    }).exceptionally(t -> {
+      LOG.error("failed to push msg {}: {}", msg, t);
+      return null;
+    });
+  }
+
+  public void push2AP(PushMsg msg) {
+    LOG.info("pushing response {}", msg);
+    CompletableFuture.runAsync(() -> {
+      pushSupplier4AP.publish(msg);
     }).exceptionally(t -> {
       LOG.error("failed to push msg {}: {}", msg, t);
       return null;
@@ -59,7 +69,7 @@ public class PushService {
     LOG.info("pushing batch msg {}", msg);
     final List<String> successfulPushes = new ArrayList<>();
     successfulPushes.addAll(
-        (usingRest ? pushRestSupplier4C : pushSupplier4C)
+        (usingRest ? pushRestSupplier4AP : pushSupplier4AP)
             .publishBatch(targets, msg)
     );
     if (successfulPushes.isEmpty() && tlUsingRest.get() == null) {
