@@ -55,5 +55,12 @@ public class MongoDB {
     );
   }
 
+  public BraceletPosition getBraceletTrack(String bracelet) {
+    return template.findOne(
+        new Query(where("_id").is(bracelet)),
+        BraceletPosition.class,
+        DB_BP
+    );
+  }
 
 }

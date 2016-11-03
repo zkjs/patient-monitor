@@ -36,6 +36,20 @@
       {
         "status": "ok"
       }
+
+- bracelet tracks [GET /track/{bracelet}]
+
+  - response body
+
+      {
+        "status": "ok",
+        "data": [{
+          "timestamp": 1478159590006,
+          "gps": {"lng" : 104.061346, "lat" : 30.641574}
+        }]
+      }
+
+## Yunba.io
       
 - broadcast msg for AP detected emergency:
 
@@ -44,6 +58,12 @@
         "message": {"apid": "ap110", "payload": "126683000000", "rssi": -32, "alert": "y", "bracelet": "82"}
       }
 
+- emergency response alias push:
+
+      {
+        "alias": "ap110",
+        "message": "医护人员马上赶到"
+      }
 
 ## Data Model
 

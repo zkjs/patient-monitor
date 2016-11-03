@@ -6,17 +6,17 @@ import com.fintech.hospital.push.model.PushMsg;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import static com.fintech.hospital.push.model.PushType.ALIAS;
-import static org.springframework.web.bind.annotation.RequestMethod.PUT;
 
 /**
  * @author baoqiang
  */
-@Controller
+@RestController
 @RequestMapping("/rescue")
 public class RescueRest {
 
@@ -25,7 +25,7 @@ public class RescueRest {
   @Autowired
   private PushService pushService;
 
-  @RequestMapping(method = PUT)
+  @PutMapping
   public Object respond(@RequestBody RescueRespond respond) {
 
     pushService.push2AP(new PushMsg(ALIAS, respond.apid, "医护人员马上赶到", null));
