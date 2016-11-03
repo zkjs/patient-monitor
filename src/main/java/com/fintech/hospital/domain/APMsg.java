@@ -1,5 +1,7 @@
 package com.fintech.hospital.domain;
 
+import com.alibaba.fastjson.annotation.JSONField;
+
 /**
  * @author baoqiang
  */
@@ -8,7 +10,25 @@ public class APMsg {
   private String apid;
   private String payload;
   private Integer rssi;
+  @JSONField(serialize = false)
   private String bandId;
+
+  private String alert;
+  private String address;
+  private Integer floor;
+
+  public void fillAP(AP ap){
+    this.address = ap.getAddress();
+    this.floor = ap.getFloor();
+  }
+
+  public String getAlert() {
+    return alert;
+  }
+
+  public void setAlert(String alert) {
+    this.alert = alert;
+  }
 
   private byte[] pkg;
 

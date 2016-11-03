@@ -31,7 +31,7 @@ public class RescueRest {
     pushService.push2AP(new PushMsg(ALIAS, respond.apid, "医护人员马上赶到", null));
 
     LOG.info(" doctor {} responded to rescue on ap {}", respond.response, respond.apid);
-    return JSON.parseObject("{status: 'ok'}");
+    return new Object();
   }
 
   public static class RescueRespond {

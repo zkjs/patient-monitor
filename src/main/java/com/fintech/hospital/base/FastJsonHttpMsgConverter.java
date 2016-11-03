@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SerializeFilter;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alibaba.fastjson.serializer.ValueFilter;
+import org.bson.types.ObjectId;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
@@ -87,7 +88,7 @@ public class FastJsonHttpMsgConverter extends AbstractHttpMessageConverter<Objec
   }
 
   private static final ValueFilter OBJECTID_FILTER = (object, name, value) -> {
-    //if (value instanceof ObjectId) return ((ObjectId) value).toHexString();
+    if (value instanceof ObjectId) return ((ObjectId) value).toHexString();
     return value;
   };
 
@@ -95,6 +96,9 @@ public class FastJsonHttpMsgConverter extends AbstractHttpMessageConverter<Objec
   protected void writeInternal(Object obj, HttpOutputMessage outputMessage) throws IOException,
       HttpMessageNotWritableException {
     OutputStream out = outputMessage.getBody();
+    if (!(obj instanceof String)) {
+      obj = new DataResponse(obj);
+    }
     SerializeFilter[] serializeFilters = Arrays.copyOf(filters, filters.length + 1);
     serializeFilters[filters.length] = OBJECTID_FILTER;
     String text = JSON.toJSONString(obj, serializeFilters, features);

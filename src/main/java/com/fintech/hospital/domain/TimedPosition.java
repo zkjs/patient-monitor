@@ -22,7 +22,25 @@ public class TimedPosition {
   }
 
   private LngLat gps;
+  private Integer floor;
+  private String ap;
   private long timestamp;
+
+  public Integer getFloor() {
+    return floor;
+  }
+
+  public void setFloor(Integer floor) {
+    this.floor = floor;
+  }
+
+  public String getAp() {
+    return ap;
+  }
+
+  public void setAp(String ap) {
+    this.ap = ap;
+  }
 
   public LngLat getGps() {
     return gps;

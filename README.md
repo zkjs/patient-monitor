@@ -29,8 +29,7 @@
         "apid": "83",
         "response": "doctorid"
       }
-  
-  
+
   - response body
   
       {
@@ -43,11 +42,92 @@
 
       {
         "status": "ok",
-        "data": [{
+        "data": {
+          "list": [{
+            "floor": 2,
+            "timestamp": 1478159590006,
+            "gps": {"lng" : 104.061346, "lat" : 30.641574}
+          }]
+      }
+
+- bracelet last position [GET /track/{bracelet}/last]
+
+  - response body
+
+      {
+        "status": "ok",
+        "data": {
+          "address": "West 204",
+          "floor": 2,
           "timestamp": 1478159590006,
           "gps": {"lng" : 104.061346, "lat" : 30.641574}
-        }]
+        }
       }
+
+- bind bracelet to patient [PUT /bracelet]
+
+  - request body (性别: 0-女, 1-男)
+
+      {
+        "bracelet": "83",
+        "patientName": "Wang Nima",
+        "patientGender": "1",
+        "patientRemark": "remark",
+        "patientPhone": "13800138000"
+      }
+
+  - response body
+
+      {
+        "status": "ok"
+      }
+
+- unbind bracelet [PUT /bracelet/binded/{bracelet}]
+
+  - request body (性别: 0-女, 1-男)
+
+      {
+        "bracelet": "581b1a6542aa101eebc77e60",
+        "name": "82"
+      }
+
+  - response body
+
+      {
+        "status": "ok"
+      }
+
+- bracelet list [GET /bracelet{?binded}] (binded: 0,1; true,false)
+
+  - response body (not binded)
+
+     {
+       "status": "ok",
+       "data": {
+        "list": [{
+          "bracelet": "581b1a6542aa101eebc77e60",
+          "name": "82"
+        }]
+       }
+     }
+
+
+  - response body (binded)
+
+     {
+       "status": "ok",
+       "data": {
+        "list": [{
+          "bracelet": "581b1a6542aa101eebc77e60",
+          "name": "82",
+          "patientName": "Wang Nima",
+          "patientGender": "1",
+          "patientRemark": "remark",
+          "patientPhone": "13800138000"
+        }]
+       }
+     }
+
 
 ## Yunba.io
       
@@ -55,15 +135,16 @@
 
       {
         "topic": "demo",
-        "message": {"apid": "ap110", "payload": "126683000000", "rssi": -32, "alert": "y", "bracelet": "82"}
+        "message": {"apid": "ap110", "floor": 2, "address": "West 208", "alert": "y", "payload": "126683000000"}
       }
 
 - emergency response alias push:
 
       {
         "alias": "ap110",
-        "message": "医护人员马上赶到"
+        "message": "Medic on the way"
       }
+
 
 ## Data Model
 

@@ -46,31 +46,40 @@ public class YunbaConsumer4AP extends YunbaConsumer {
 
   final RssiDistanceModel RSSI_MODEL = new RssiDistanceModel(0.1820634, 0.8229884, 6.6525179, -75);
 
+  @Value("${yunba.rescue.topic}")
+  private String RESCUE_TOPIC;
+
   @Override
   public void consume(String msg) {
     LOG.info("consuming ap msg... {}", msg);
     APMsg apMsg = JSON.parseObject(msg, APMsg.class);
-    /* categorize msg type: urgency (push to mon immediately for alert), tracing */
-    if (apMsg.urgent()) {
-      LOG.info("band {} in emergency, detected by ap {}", apMsg.bracelet(), apMsg.getApid());
-      pushService.push2Mon(new PushMsg(BROADCAST, "demo", msg, new YunbaOpts(new YunbaOpts.YunbaAps(
-          msg, apMsg.getApid() + "正在呼救"
-      ))));
-    }
+
 
     final long current = System.currentTimeMillis();
-    final String bracelet = apMsg.bracelet();
+    final String bracelet = mongo.getBracelet(apMsg.bracelet()).getId().toHexString();
 
-    /* fetch ap position */
+    /* query ap */
     supplyAsync(() -> mongo.getAP(apMsg.getApid())
     ).thenCompose(ap -> {
+      if (ap == null) throw new IllegalArgumentException("ap not exists " + apMsg.getApid());
+
+      /* categorize msg type: urgency (push to mon immediately for alert), tracing */
+      if (apMsg.urgent()) {
+        LOG.info("band {} in emergency, detected by ap {}", apMsg.bracelet(), apMsg.getApid());
+        apMsg.fillAP(ap);
+        String broadcast = JSON.toJSONString(apMsg);
+        pushService.push2Mon(new PushMsg(BROADCAST, RESCUE_TOPIC, broadcast, new YunbaOpts(new YunbaOpts.YunbaAps(
+            broadcast, String.format("(%s)%s 位置有人呼救", apMsg.getApid(), ap.getAddress())
+        ))));
+      }
+
       runAsync(() -> mongo.addBraceletTrace(
           apMsg.bracelet(),
           new BraceletTrace(apMsg.getApid(), apMsg.getRssi(), ap.getGps())
       ));
       /* pop all latest positions */
       return supplyAsync(() ->
-          cache.push(bracelet, ap.getId(), new TimedPosition(ap.getGps(), current), RSSI_MODEL.distance(apMsg.getRssi()))
+          cache.push(bracelet, ap.getAlias(), new TimedPosition(ap.getGps(), current), RSSI_MODEL.distance(apMsg.getRssi()))
       );
     }).thenAccept(positions -> {
       /* cache bandid, lnglatDistance and ap lnglat to list */
