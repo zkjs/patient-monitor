@@ -2,6 +2,7 @@ package com.fintech.hospital.domain;
 
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author baoqiang
@@ -10,9 +11,9 @@ public class TimedPosition {
 
   @Override
   public String toString() {
-    return String.format("%s@%s, near: %s-floor[%s]",
-        gps.toString(), new Date(timestamp).toInstant().toString(),
-        ap, floor
+    return String.format("%s (radius: %s), near: %s-floor[%s] @%s",
+        gps.toString(), radius, ap, floor,
+        new Date(timestamp).toInstant().toString()
     );
   }
 
@@ -76,32 +77,32 @@ public class TimedPosition {
     this.timestamp = timestamp;
   }
 
-  public static TimedPosition mean(TimedPosition[] allpos, double[] ratios) {
+  public static TimedPosition mean(List<TimedPosition> allpos, double[] ratios) {
     if (allpos == null) throw new IllegalArgumentException("pos should not be null!");
     AP nearestAP = new AP();
     if (ratios == null) {
-      ratios = new double[allpos.length];
-      Arrays.fill(ratios, 1.0 / allpos.length);
+      ratios = new double[allpos.size()];
+      Arrays.fill(ratios, 1.0 / allpos.size());
     }
-    if (allpos.length != ratios.length) {
+    if (allpos.size() != ratios.length) {
       throw new IllegalArgumentException("pos and ratio size should match: pos="
-          + allpos.length + ", ratios=" + ratios.length);
+          + allpos.size() + ", ratios=" + ratios.length);
     }
     double time = 0.0, lng = 0.0, lat = 0.0, radius = 0.0, maxratio = 0.0;
     int nearestAPIndex = 0;
-    for (int i = 0; i < allpos.length; i++) {
-      time += allpos[i].getTimestamp() * ratios[i];
-      lng += allpos[i].getGps().getLng() * ratios[i];
-      lat += allpos[i].getGps().getLat() * ratios[i];
-      radius += allpos[i].getRadius() * ratios[i];
+    for (int i = 0; i < allpos.size(); i++) {
+      time += allpos.get(i).getTimestamp() * ratios[i];
+      lng += allpos.get(i).getGps().getLng() * ratios[i];
+      lat += allpos.get(i).getGps().getLat() * ratios[i];
+      radius += allpos.get(i).getRadius() * ratios[i];
       if (ratios[i] > maxratio) {
         maxratio = ratios[i];
         nearestAPIndex = i;
       }
     }
     nearestAP.setGps(lng, lat);
-    nearestAP.setAlias(allpos[nearestAPIndex].getAp());
-    nearestAP.setFloor(allpos[nearestAPIndex].getFloor());
+    nearestAP.setAlias(allpos.get(nearestAPIndex).getAp());
+    nearestAP.setFloor(allpos.get(nearestAPIndex).getFloor());
     return new TimedPosition(nearestAP, (long) time, radius);
   }
 

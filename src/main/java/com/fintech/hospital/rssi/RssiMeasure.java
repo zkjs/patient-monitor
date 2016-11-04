@@ -2,6 +2,7 @@ package com.fintech.hospital.rssi;
 
 import com.fintech.hospital.domain.LngLat;
 import com.fintech.hospital.domain.TimedPosition;
+import com.google.common.collect.Lists;
 import org.apache.commons.math3.fitting.leastsquares.*;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
@@ -13,8 +14,11 @@ import org.apache.commons.math3.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.function.IntFunction;
+import java.util.stream.Collectors;
 
 /**
  * @author baoqiang
@@ -35,18 +39,19 @@ public class RssiMeasure {
 
   public static TimedPosition positioning(List<TimedPosition> positions, String bracelet, boolean euclidean) {
     Logger LOG = LoggerFactory.getLogger(RssiMeasure.class);
-    final Vector2D[] observes = (Vector2D[]) positions.stream().map(p -> p.getGps().vector()).toArray();
+    final List<Vector2D> observes = positions.stream().map(p -> p.getGps().vector()).collect(Collectors.toList());
+
 
     MultivariateJacobianFunction distancesToCurrentCenter = point -> {
       Vector2D center = new Vector2D(point.getEntry(0), point.getEntry(1));
-      RealVector value = new ArrayRealVector(observes.length);
-      RealMatrix jacobian = new Array2DRowRealMatrix(observes.length, 2);
-      for (int i = 0; i < observes.length; ++i) {
-        Vector2D o = observes[i];
+      RealVector value = new ArrayRealVector(observes.size());
+      RealMatrix jacobian = new Array2DRowRealMatrix(observes.size(), 2);
+      for (int i = 0; i < observes.size(); ++i) {
+        Vector2D o = observes.get(i);
         double modelI = Vector2D.distance(o, center);
         value.setEntry(i, modelI);
         jacobian.setEntry(i, 0, (center.getX() - o.getX()) / modelI);
-        jacobian.setEntry(i, 1, (center.getX() - o.getX()) / modelI);
+        jacobian.setEntry(i, 1, (center.getY() - o.getY()) / modelI);
       }
       return new Pair<>(value, jacobian);
     };
@@ -56,11 +61,13 @@ public class RssiMeasure {
         positions.stream().mapToDouble(p -> lnglatDistance(p.getRadius())).toArray();
 
     double distanceSum = positions.stream().mapToDouble(TimedPosition::getRadius).sum();
-    double[] ratios = positions.stream().mapToDouble(p -> p.getRadius() / distanceSum).toArray();
-    TimedPosition start = TimedPosition.mean((TimedPosition[]) positions.toArray(), ratios);
+    double[] ratios = positions.stream().mapToDouble(p -> (distanceSum-p.getRadius()) / distanceSum).toArray();
+    TimedPosition start = TimedPosition.mean(positions, ratios);
 
+    LOG.debug("position evaluation starting from {}", start);
+    LOG.debug("targeting {}, ratios: {}", Arrays.toString(prescribedDistance), Arrays.toString(ratios));
     LeastSquaresProblem problem = new LeastSquaresBuilder()
-        .checkerPair(new SimpleVectorValueChecker(1e-8, 1e-8))
+        .checkerPair(new SimpleVectorValueChecker(1e-10, 1e-10))
         .model(distancesToCurrentCenter)
         .maxEvaluations(100)
         .maxIterations(50)
@@ -71,9 +78,9 @@ public class RssiMeasure {
     LeastSquaresOptimizer.Optimum optimum = new LevenbergMarquardtOptimizer().optimize(problem);
     LngLat center = new LngLat(optimum.getPoint().toArray());
     LOG.debug("{} fitted center: [{}, {}]", bracelet, center.getLng(), center.getLat());
-    LOG.info("{} positioning RMS: ", bracelet, optimum.getRMS());
-    LOG.debug("{} evaluations: ", bracelet, optimum.getEvaluations());
-    LOG.debug("{} iterations: ", bracelet, optimum.getIterations());
+    LOG.info("{} positioning starting@{}, RMS: {}", bracelet, center, optimum.getRMS());
+    LOG.debug("{} evaluations: {}", bracelet, optimum.getEvaluations());
+    LOG.debug("{} iterations: {}", bracelet, optimum.getIterations());
     start.setGps(center);
     return start;
   }
@@ -81,6 +88,5 @@ public class RssiMeasure {
   private static double lnglatDistance(double distance) {
     return distance * 180 / (Math.PI * 63781370);
   }
-
 
 }

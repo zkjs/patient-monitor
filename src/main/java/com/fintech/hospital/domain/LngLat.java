@@ -9,7 +9,7 @@ public class LngLat {
 
   @Override
   public String toString() {
-    return String.format("lng: %s, lat: %s", lng, lat);
+    return String.format("[%s,%s]", lng, lat);
   }
 
   private double lng;

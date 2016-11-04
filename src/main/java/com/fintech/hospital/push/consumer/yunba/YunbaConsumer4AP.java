@@ -11,10 +11,13 @@ import com.fintech.hospital.push.model.PushMsg;
 import com.fintech.hospital.push.supplier.yunba.YunbaOpts;
 import com.fintech.hospital.rssi.RssiDistanceModel;
 import com.fintech.hospital.rssi.RssiMeasure;
+import com.google.common.collect.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 import static com.fintech.hospital.domain.TimedPosition.mean;
 import static com.fintech.hospital.push.model.PushType.BROADCAST;
@@ -49,6 +52,9 @@ public class YunbaConsumer4AP extends YunbaConsumer {
   @Value("${yunba.rescue.topic}")
   private String RESCUE_TOPIC;
 
+  @Value("${yunba.trace.alias}")
+  private String TRACE_ALIAS;
+
   @Value("${distance.coords.euclidean}")
   private boolean USE_EUCLIDEAN;
 
@@ -56,7 +62,6 @@ public class YunbaConsumer4AP extends YunbaConsumer {
   public void consume(String msg) {
     LOG.info("consuming ap msg... {}", msg);
     APMsg apMsg = JSON.parseObject(msg, APMsg.class);
-
 
     final long current = System.currentTimeMillis();
     final String bracelet = mongo.getBracelet(apMsg.bracelet()).getId().toHexString();
@@ -70,6 +75,8 @@ public class YunbaConsumer4AP extends YunbaConsumer {
       if (apMsg.urgent()) {
         LOG.info("band {} in emergency, detected by ap {}", apMsg.bracelet(), apMsg.getApid());
         apMsg.fillAP(ap);
+        List<TimedPosition> positionList = mongo.getBraceletTrack(bracelet).getPosition();
+        apMsg.setPosition(positionList.get(positionList.size()-1));
         String broadcast = JSON.toJSONString(apMsg);
         pushService.push2Mon(new PushMsg(BROADCAST, RESCUE_TOPIC, broadcast, new YunbaOpts(new YunbaOpts.YunbaAps(
             broadcast, String.format("(%s)%s 位置有人呼救", apMsg.getApid(), ap.getAddress())
@@ -97,8 +104,7 @@ public class YunbaConsumer4AP extends YunbaConsumer {
           TimedPosition pos0 = positions.get(0),
               pos1 = positions.get(1);
           double distRatio0 = pos0.getRadius() / (pos0.getRadius() + pos1.getRadius());
-          braceletPosition = mean(new TimedPosition[]{positions.get(0), positions.get(1)},
-              new double[]{distRatio0, 1 - distRatio0});
+          braceletPosition = mean(positions, new double[]{1- distRatio0, distRatio0});
           break;
         default:
           braceletPosition = RssiMeasure.positioning(positions, bracelet, USE_EUCLIDEAN);
@@ -116,7 +122,7 @@ public class YunbaConsumer4AP extends YunbaConsumer {
   @Override
   public void onConnAck(Object json) throws Exception {
     LOG.info("yunba for ap {} connected {}", current, json);
-    alias("alias2");
+    alias(TRACE_ALIAS);
   }
 
 }

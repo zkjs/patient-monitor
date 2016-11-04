@@ -2,6 +2,7 @@ package com.fintech.hospital.data;
 
 import com.fintech.hospital.domain.TimedPosition;
 import org.apache.commons.math3.util.Pair;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -13,6 +14,9 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Component
 public class Cache {
+
+  @Value("${cache.position.expire}")
+  private long PERIOD;
 
   public List<TimedPosition> push(String bracelet, String apid, TimedPosition pos){
     BraceletPosCache c = CACHE.get(bracelet);
@@ -26,11 +30,15 @@ public class Cache {
       }
     }
     c.data.put(apid, pos);
-    if (c.data.size() > 4 || c.expired()) {
+    if (c.data.size() > 4 || expired(c.timestamp)) {
       c = CACHE.remove(bracelet);
       return new ArrayList<>(c.data.values());
     }
     return null;
+  }
+
+  private boolean expired(long timestamp) {
+    return System.currentTimeMillis() - timestamp > PERIOD;
   }
 
   private static final ConcurrentHashMap<String, BraceletPosCache> CACHE = new ConcurrentHashMap<>();
@@ -39,9 +47,6 @@ public class Cache {
     ConcurrentHashMap<String, TimedPosition> data = new ConcurrentHashMap<>(5);
     long timestamp;
 
-    boolean expired() {
-      return (System.currentTimeMillis() - this.timestamp) / 1000 > 5;
-    }
 
     BraceletPosCache(long timestamp, ConcurrentHashMap<String, TimedPosition> data) {
       this.timestamp = timestamp;

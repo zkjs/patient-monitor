@@ -47,6 +47,7 @@
             "ap": "nearest ap addr",
             "floor": 2,
             "timestamp": 1478159590006,
+            "radius": 23.121,
             "gps": {"lng" : 104.061346, "lat" : 30.641574}
           }]
       }
@@ -61,6 +62,7 @@
           "address": "West 204",
           "floor": 2,
           "timestamp": 1478159590006,
+          "radius": 23.121,
           "gps": {"lng" : 104.061346, "lat" : 30.641574}
         }
       }
@@ -145,7 +147,21 @@
 
       {
         "topic": "demo",
-        "message": {"apid": "ap110", "floor": 2, "address": "West 208", "alert": "y", "payload": "126683000000"}
+        "message": {
+          "apid": "ap110",
+          "floor": 2,
+          "address": "West 208",
+          "alert": "y",
+          "payload": "126683000000",
+          "bracelet": "581b1a6542aa101eebc77e60",
+          "position": {
+            "ap": "nearest ap addr",
+            "floor": 2,
+            "timestamp": 1478159590006,
+            "radius": 23.121,
+            "gps": {"lng" : 104.061346, "lat" : 30.641574}
+          }
+        }
       }
 
 - emergency response alias push:

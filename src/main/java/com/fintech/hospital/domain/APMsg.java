@@ -17,9 +17,21 @@ public class APMsg {
   private String address;
   private Integer floor;
 
+  private TimedPosition position;
+
+  private String bracelet;
+
   public void fillAP(AP ap) {
     this.address = ap.getAddress();
     this.floor = ap.getFloor();
+  }
+
+  public TimedPosition getPosition() {
+    return position;
+  }
+
+  public void setPosition(TimedPosition position) {
+    this.position = position;
   }
 
   public String getAlert() {
@@ -28,6 +40,30 @@ public class APMsg {
 
   public void setAlert(String alert) {
     this.alert = alert;
+  }
+
+  public String getBracelet() {
+    return bracelet;
+  }
+
+  public String getAddress() {
+    return address;
+  }
+
+  public void setAddress(String address) {
+    this.address = address;
+  }
+
+  public Integer getFloor() {
+    return floor;
+  }
+
+  public void setFloor(Integer floor) {
+    this.floor = floor;
+  }
+
+  public void setBracelet(String bracelet) {
+    this.bracelet = bracelet;
   }
 
   private byte[] pkg;
