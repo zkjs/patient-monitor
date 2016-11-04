@@ -70,6 +70,12 @@ public class AP {
     return new LngLat(longitude, latitude);
   }
 
+
+  public void setGps(double longitude, double latitude){
+    this.longitude = longitude;
+    this.latitude = latitude;
+  }
+
   public Date getCreate() {
     return create;
   }

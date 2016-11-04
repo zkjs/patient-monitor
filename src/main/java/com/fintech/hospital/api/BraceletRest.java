@@ -3,6 +3,7 @@ package com.fintech.hospital.api;
 import com.fintech.hospital.data.MongoDB;
 import com.fintech.hospital.domain.Bracelet;
 import com.google.common.collect.ImmutableMap;
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -39,10 +40,14 @@ public class BraceletRest {
   }
 
   @PutMapping("/binded/{bid}")
-  public Object bind(@PathVariable("bid") String bracelet, BindingResult bindingResult) {
+  public Object bind(
+      @PathVariable("bid") String bid,
+      @Valid @RequestBody Bracelet bracelet, BindingResult bindingResult
+  ) {
     if (bindingResult.hasErrors()) {
       return String.format("{'status': 'err', 'error': %s}", bindingResult.getFieldError().getField());
     }
+    bracelet.setId(new ObjectId(bid));
     Bracelet let = mongo.unbindBracelet(bracelet);
     if(let==null) return "{'status': 'err', 'error': 'bracelet not found'}";
     return let;

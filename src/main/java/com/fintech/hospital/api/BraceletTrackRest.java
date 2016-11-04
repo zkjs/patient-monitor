@@ -41,8 +41,8 @@ public class BraceletTrackRest {
         "timestamp", pos.getTimestamp(),
         "gps", pos.getGps()
     ) : ImmutableMap.of(
-        "address", ap.getAddress(),
-        "floor", ap.getFloor(),
+        "address", ap.getAddress()==null?"":ap.getAddress(),
+        "floor", ap.getFloor()==null?"":ap.getFloor(),
         "timestamp", pos.getTimestamp(),
         "gps", pos.getGps()
     );

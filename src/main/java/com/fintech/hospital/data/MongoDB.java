@@ -1,6 +1,7 @@
 package com.fintech.hospital.data;
 
 import com.fintech.hospital.domain.*;
+import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +39,7 @@ public class MongoDB {
   private String DB_BRACELET;
 
   public AP getAP(String apid) {
-    return template.findOne(new Query(where("id").is(apid)), AP.class, DB_AP);
+    return template.findOne(new Query(where("name").is(apid)), AP.class, DB_AP);
   }
 
   public void addBraceletTrace(String bracelet, BraceletTrace trace) {
@@ -49,8 +50,8 @@ public class MongoDB {
   }
 
   public void addBraceletPosition(String bracelet, TimedPosition pos) {
-    template.updateFirst(
-        new Query(where("_id").is(bracelet)),
+    template.upsert(
+        new Query(where("_id").is(new ObjectId(bracelet))),
         new Update().push("position", pos),
         BraceletPosition.class,
         DB_BP
@@ -67,13 +68,13 @@ public class MongoDB {
 
   public List<Bracelet> braceletList(boolean binded) {
     return template.find(
-        new Query(where("status").is(binded?1:0)),
+        new Query(where("status").is(binded ? 1 : 0)),
         Bracelet.class,
         DB_BRACELET
     );
   }
 
-  public Bracelet getBracelet(String idInBLE){
+  public Bracelet getBracelet(String idInBLE) {
     return template.findOne(
         new Query(where("name").is(idInBLE)),
         Bracelet.class,
@@ -81,25 +82,30 @@ public class MongoDB {
     );
   }
 
-  public Bracelet bindBracelet(Bracelet fromPatient){
+  public Bracelet bindBracelet(Bracelet fromPatient) {
     Bracelet let = template.findOne(
         new Query(where("_id").is(fromPatient.getId()).and("status").is(0)),
         Bracelet.class,
         DB_BRACELET
     );
-    if(let==null) return null;
+    if (let == null) return null;
     let.bindPatient(fromPatient);
     template.save(let, DB_BRACELET);
     return let;
   }
 
-  public Bracelet unbindBracelet(String bracelet){
+  public Bracelet unbindBracelet(Bracelet bracelet) {
     Bracelet let = template.findOne(
-        new Query(where("_id").is(bracelet).and("status").is(1)),
+        new Query(
+            where("_id").is(bracelet.getId())
+                .and("status").is(1)
+                .and("patientName").is(bracelet.getPatientName())
+                .and("patientDBGender").is(bracelet.getPatientDBGender())
+        ),
         Bracelet.class,
         DB_BRACELET
     );
-    if(let ==null) return null;
+    if (let == null) return null;
     let.unbindPatient();
     template.save(let, DB_BRACELET);
     return let;

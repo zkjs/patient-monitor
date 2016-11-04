@@ -55,6 +55,7 @@ public class Bracelet {
     setStatus(0);
   }
 
+  @Field("patientGender")
   @JSONField(serialize = false)
   private String patientDBGender;
 
@@ -62,10 +63,10 @@ public class Bracelet {
     return patientDBGender;
   }
 
-  public void setPatientDBGender(String patientDBGenger) {
-    if("M".equals(patientDBGenger)) this.patientGender = "1";
-    else if("F".equals(patientDBGenger)) this.patientGender = "0";
-    this.patientDBGender = patientDBGenger;
+  public void setPatientDBGender(String patientDBGender) {
+    if("M".equals(patientDBGender)) this.patientGender = "1";
+    else if("F".equals(patientDBGender)) this.patientGender = "0";
+    this.patientDBGender = patientDBGender;
   }
 
   /**
@@ -85,7 +86,6 @@ public class Bracelet {
   @Size(max = 128)
   private String patientRemark;
 
-  @NotNull
   @Size(min = 11, max = 11)
   @Digits(integer = 11, fraction = 0)
   private String patientPhone;
@@ -107,6 +107,8 @@ public class Bracelet {
   }
 
   public String getPatientGender() {
+    if("M".equals(patientDBGender)) this.patientGender = "1";
+    else if("F".equals(patientDBGender)) this.patientGender = "0";
     return patientGender;
   }
 

@@ -10,7 +10,7 @@
   <Appenders>
     <appender name="Console" type="Console">
       <PatternLayout
-          pattern="%style{${profile}}{white} %style{PARK(${ver})}{cyan} %highlight{%level %d{yyyy-MM-dd HH:mm:ss,SSS} [%t]}{FATAL=bg_red, ERROR=bg_magenta, WARN=bg_yellow, INFO=white, DEBUG=green, TRACE=blue} %c: %m%n"/>
+          pattern="%style{${profile}}{white} %style{PTMON(${ver})}{cyan} %highlight{%level %d{yyyy-MM-dd HH:mm:ss,SSS} [%t]}{FATAL=bg_red, ERROR=bg_magenta, WARN=bg_yellow, INFO=white, DEBUG=green, TRACE=blue} %c: %m%n"/>
     </appender>
     <RandomAccessFile name="PTMON" type="RollingFile" immediateFlush="false" fileName="${logpath}/ptmon.log"
                       append="true"

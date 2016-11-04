@@ -44,6 +44,7 @@
         "status": "ok",
         "data": {
           "list": [{
+            "ap": "nearest ap addr",
             "floor": 2,
             "timestamp": 1478159590006,
             "gps": {"lng" : 104.061346, "lat" : 30.641574}
@@ -66,7 +67,7 @@
 
 - bind bracelet to patient [PUT /bracelet]
 
-  - request body (性别: 0-女, 1-男)
+  - request body (gender: 0-female, 1-male)
 
       {
         "bracelet": "83",
@@ -84,17 +85,21 @@
 
 - unbind bracelet [PUT /bracelet/binded/{bracelet}]
 
-  - request body (性别: 0-女, 1-男)
+  - request body
 
       {
-        "bracelet": "581b1a6542aa101eebc77e60",
-        "name": "82"
+        "patientName": "Wang Nima"
+        "patientGender": "1"
       }
 
   - response body
 
       {
-        "status": "ok"
+        "status": "ok",
+        "data": {
+          "bracelet": "581b1a6542aa101eebc77e60",
+          "name": "82"
+        }
       }
 
 - bracelet list [GET /bracelet{?binded}] (binded: 0,1; true,false)
@@ -148,16 +153,6 @@
 
 ## Data Model
 
-- AP
-
-column | type | description
--------|------|------------
-id | string | AP id
-gps | LngLat | AP location
-status | string | 
-create | Date | create date
-
-
 - Bracelet Trace
 
 column | type | description
@@ -174,5 +169,5 @@ create | Date | create date of the trace
 column | type | description
 -------|------|------------
 id | string | bracelet id
-position | array | LngLat with timestamp, position tracks of the bracelet
+position | array | LngLat with timestamp, ap, floor, position tracks of the bracelet
 

@@ -71,7 +71,8 @@ public class RssiMeasure {
     LOG.info("{} positioning RMS: ", bracelet, optimum.getRMS());
     LOG.debug("{} evaluations: ", bracelet, optimum.getEvaluations());
     LOG.debug("{} iterations: ", bracelet, optimum.getIterations());
-    return new TimedPosition(center, start.getTimestamp());
+    start.setGps(center);
+    return start;
   }
 
   private static double lnglatDistance(double distance) {

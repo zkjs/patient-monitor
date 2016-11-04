@@ -79,7 +79,7 @@ public class YunbaConsumer4AP extends YunbaConsumer {
       ));
       /* pop all latest positions */
       return supplyAsync(() ->
-          cache.push(bracelet, ap.getAlias(), new TimedPosition(ap.getGps(), current), RSSI_MODEL.distance(apMsg.getRssi()))
+          cache.push(bracelet, ap.getAlias(), new TimedPosition(ap, current), RSSI_MODEL.distance(apMsg.getRssi()))
       );
     }).thenAccept(positions -> {
       /* cache bandid, lnglatDistance and ap lnglat to list */

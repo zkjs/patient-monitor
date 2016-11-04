@@ -1,5 +1,7 @@
 package com.fintech.hospital.domain;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 import java.util.Arrays;
 import java.util.Date;
 
@@ -10,14 +12,19 @@ public class TimedPosition {
 
   @Override
   public String toString() {
-    return gps.toString() + "@" + new Date(timestamp).toInstant().toString();
+    return String.format("%s@%s, near: %s-floor[%s]",
+        gps.toString(), new Date(timestamp).toInstant().toString(),
+        ap, floor
+    );
   }
 
   public TimedPosition() {
   }
 
-  public TimedPosition(LngLat gps, long timestamp) {
-    this.gps = gps;
+  public TimedPosition(AP ap, long timestamp) {
+    this.gps = ap.getGps();
+    this.floor = ap.getFloor();
+    this.ap = ap.getAlias();
     this.timestamp = timestamp;
   }
 
@@ -60,6 +67,7 @@ public class TimedPosition {
 
   public static TimedPosition mean(TimedPosition[] allpos, double[] ratios) {
     if (allpos == null) throw new IllegalArgumentException("pos should not be null!");
+    AP nearestAP = new AP();
     if (ratios == null) {
       ratios = new double[allpos.length];
       Arrays.fill(ratios, 1.0 / allpos.length);
@@ -68,13 +76,21 @@ public class TimedPosition {
       throw new IllegalArgumentException("pos and ratio size should match: pos="
           + allpos.length + ", ratios=" + ratios.length);
     }
-    double time = 0.0, lng = 0.0, lat = 0.0;
+    double time = 0.0, lng = 0.0, lat = 0.0, maxratio = 0.0;
+    int nearestAPIndex = 0;
     for (int i = 0; i < allpos.length; i++) {
       time += allpos[i].getTimestamp() * ratios[i];
       lng = +allpos[i].getGps().getLng() * ratios[i];
       lat = +allpos[i].getGps().getLat() * ratios[i];
+      if(ratios[i]>maxratio){
+        maxratio = ratios[i];
+        nearestAPIndex = i;
+      }
     }
-    return new TimedPosition(new LngLat(lng, lat), (long) time);
+    nearestAP.setGps(lng, lat);
+    nearestAP.setAlias(allpos[nearestAPIndex].getAp());
+    nearestAP.setFloor(allpos[nearestAPIndex].getFloor());
+    return new TimedPosition(nearestAP, (long) time);
   }
 
 }
