@@ -155,12 +155,24 @@
             </exclusion>
           </exclusions>
         </dependency>
+        <!--<dependency>-->
+          <!--<groupId>javax.servlet</groupId>-->
+          <!--<artifactId>javax.servlet-api</artifactId>-->
+          <!--<scope>provided</scope>-->
+        <!--</dependency>-->
         <dependency>
-          <groupId>javax.servlet</groupId>
-          <artifactId>javax.servlet-api</artifactId>
-          <scope>provided</scope>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-starter-undertow</artifactId>
         </dependency>
       </dependencies>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-maven-plugin</artifactId>
+          </plugin>
+        </plugins>
+      </build>
     </profile>
 
     <profile>
