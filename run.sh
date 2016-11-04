@@ -1,5 +1,7 @@
 #! /bin/bash -e
 
+pkill -f 'patient'
+
 export JAVA_HOME=/opt/jdk8/jdk1.8.0_71/
 
 mvn clean package -P alpha
