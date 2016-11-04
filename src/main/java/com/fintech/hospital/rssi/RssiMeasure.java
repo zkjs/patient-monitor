@@ -4,6 +4,7 @@ import com.fintech.hospital.domain.LngLat;
 import com.fintech.hospital.domain.TimedPosition;
 import com.google.common.collect.Lists;
 import org.apache.commons.math3.fitting.leastsquares.*;
+import org.apache.commons.math3.geometry.Vector;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.ArrayRealVector;
@@ -37,10 +38,13 @@ public class RssiMeasure {
     measures.put(unique, previousMeasure - 0.8 * (previousMeasure - rssi));
   }
 
+  private static final long E_QUATORIAL_EARTH_RADIUS = 63781370;
+
+  private static final double DEG_2_RAD = (Math.PI / 180D);
+
   public static TimedPosition positioning(List<TimedPosition> positions, String bracelet, boolean euclidean) {
     Logger LOG = LoggerFactory.getLogger(RssiMeasure.class);
     final List<Vector2D> observes = positions.stream().map(p -> p.getGps().vector()).collect(Collectors.toList());
-
 
     MultivariateJacobianFunction distancesToCurrentCenter = point -> {
       Vector2D center = new Vector2D(point.getEntry(0), point.getEntry(1));
@@ -48,7 +52,7 @@ public class RssiMeasure {
       RealMatrix jacobian = new Array2DRowRealMatrix(observes.size(), 2);
       for (int i = 0; i < observes.size(); ++i) {
         Vector2D o = observes.get(i);
-        double modelI = Vector2D.distance(o, center);
+        double modelI =  euclidean ? Vector2D.distance(o, center) : distance(o, center);
         value.setEntry(i, modelI);
         jacobian.setEntry(i, 0, (center.getX() - o.getX()) / modelI);
         jacobian.setEntry(i, 1, (center.getY() - o.getY()) / modelI);
@@ -67,7 +71,7 @@ public class RssiMeasure {
     LOG.debug("position evaluation starting from {}", start);
     LOG.debug("targeting {}, ratios: {}", Arrays.toString(prescribedDistance), Arrays.toString(ratios));
     LeastSquaresProblem problem = new LeastSquaresBuilder()
-        .checkerPair(new SimpleVectorValueChecker(1e-10, 1e-10))
+        .checkerPair(new SimpleVectorValueChecker(1e-8, 1e-8))
         .model(distancesToCurrentCenter)
         .maxEvaluations(100)
         .maxIterations(50)
@@ -85,8 +89,18 @@ public class RssiMeasure {
     return start;
   }
 
+  private static double distance(Vector2D o, Vector2D center){
+    double dlong = (o.getX() - center.getX()) * DEG_2_RAD;
+    double dlat = (o.getY() - center.getY()) * DEG_2_RAD;
+    double a = Math.pow(Math.sin(dlat / 2D), 2D)
+        + Math.cos(o.getY() * DEG_2_RAD) * Math.cos(o.getY() * DEG_2_RAD)
+        * Math.pow(Math.sin(dlong / 2D), 2D);
+    double c = 2D * Math.atan2(Math.sqrt(a), Math.sqrt(1D - a));
+    return E_QUATORIAL_EARTH_RADIUS * c;
+  }
+
   private static double lnglatDistance(double distance) {
-    return distance * 180 / (Math.PI * 63781370);
+    return distance * 180 / (Math.PI * E_QUATORIAL_EARTH_RADIUS);
   }
 
 }
