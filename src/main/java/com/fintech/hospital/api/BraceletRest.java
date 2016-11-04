@@ -35,7 +35,7 @@ public class BraceletRest {
       return String.format("{'status': 'err', 'error': %s}", bindingResult.getFieldError().getField());
     }
     Bracelet let = mongo.bindBracelet(bracelet);
-    if(let==null) return "{'status': 'err', 'error': 'bracelet not found'}";
+    if (let == null) return "{'status': 'err', 'error': 'bracelet not found'}";
     return let;
   }
 
@@ -49,7 +49,7 @@ public class BraceletRest {
     }
     bracelet.setId(new ObjectId(bid));
     Bracelet let = mongo.unbindBracelet(bracelet);
-    if(let==null) return "{'status': 'err', 'error': 'bracelet not found'}";
+    if (let == null) return "{'status': 'err', 'error': 'bracelet not found'}";
     return let;
   }
 

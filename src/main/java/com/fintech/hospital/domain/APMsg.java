@@ -17,7 +17,7 @@ public class APMsg {
   private String address;
   private Integer floor;
 
-  public void fillAP(AP ap){
+  public void fillAP(AP ap) {
     this.address = ap.getAddress();
     this.floor = ap.getFloor();
   }

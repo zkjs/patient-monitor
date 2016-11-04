@@ -49,6 +49,9 @@ public class YunbaConsumer4AP extends YunbaConsumer {
   @Value("${yunba.rescue.topic}")
   private String RESCUE_TOPIC;
 
+  @Value("${distance.coords.euclidean}")
+  private boolean USE_EUCLIDEAN;
+
   @Override
   public void consume(String msg) {
     LOG.info("consuming ap msg... {}", msg);
@@ -79,7 +82,7 @@ public class YunbaConsumer4AP extends YunbaConsumer {
       ));
       /* pop all latest positions */
       return supplyAsync(() ->
-          cache.push(bracelet, ap.getAlias(), new TimedPosition(ap, current), RSSI_MODEL.distance(apMsg.getRssi()))
+          cache.push(bracelet, ap.getAlias(), new TimedPosition(ap, current, RSSI_MODEL.distance(apMsg.getRssi())))
       );
     }).thenAccept(positions -> {
       /* cache bandid, lnglatDistance and ap lnglat to list */
@@ -88,17 +91,17 @@ public class YunbaConsumer4AP extends YunbaConsumer {
       TimedPosition braceletPosition = null;
       switch (positions.size()) {
         case 1:
-          braceletPosition = positions.get(0).getKey();
+          braceletPosition = positions.get(0);
           break;
         case 2:
-          double apDist0 = positions.get(0).getValue(),
-              apDist1 = positions.get(1).getValue(),
-              distRatio0 = apDist0 / (apDist0 + apDist1);
-          braceletPosition = mean(new TimedPosition[]{positions.get(0).getKey(), positions.get(1).getKey()},
+          TimedPosition pos0 = positions.get(0),
+              pos1 = positions.get(1);
+          double distRatio0 = pos0.getRadius() / (pos0.getRadius() + pos1.getRadius());
+          braceletPosition = mean(new TimedPosition[]{positions.get(0), positions.get(1)},
               new double[]{distRatio0, 1 - distRatio0});
           break;
         default:
-          braceletPosition = RssiMeasure.positioning(positions, bracelet);
+          braceletPosition = RssiMeasure.positioning(positions, bracelet, USE_EUCLIDEAN);
           break;
       }
       mongo.addBraceletPosition(bracelet, braceletPosition);

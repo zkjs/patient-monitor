@@ -33,9 +33,9 @@ public class RssiMeasure {
     measures.put(unique, previousMeasure - 0.8 * (previousMeasure - rssi));
   }
 
-  public static TimedPosition positioning(List<Pair<TimedPosition, Double>> positions, String bracelet) {
+  public static TimedPosition positioning(List<TimedPosition> positions, String bracelet, boolean euclidean) {
     Logger LOG = LoggerFactory.getLogger("Positioning");
-    final Vector2D[] observes = (Vector2D[]) positions.stream().map(p -> p.getKey().getGps().vector()).toArray();
+    final Vector2D[] observes = (Vector2D[]) positions.stream().map(p -> p.getGps().vector()).toArray();
 
     MultivariateJacobianFunction distancesToCurrentCenter = point -> {
       Vector2D center = new Vector2D(point.getEntry(0), point.getEntry(1));
@@ -50,11 +50,14 @@ public class RssiMeasure {
       }
       return new Pair<>(value, jacobian);
     };
-    double[] prescribedDistance = positions.stream().mapToDouble(p -> lnglatDistance(p.getValue())).toArray();
 
-    double distanceSum = positions.stream().mapToDouble(Pair::getValue).sum();
-    double[] ratios = positions.stream().mapToDouble(p -> p.getValue() / distanceSum).toArray();
-    TimedPosition start = TimedPosition.mean((TimedPosition[]) positions.stream().map(Pair::getKey).toArray(), ratios);
+    double[] prescribedDistance = euclidean?
+        positions.stream().mapToDouble(TimedPosition::getRadius).toArray():
+        positions.stream().mapToDouble(p -> lnglatDistance(p.getRadius())).toArray();
+
+    double distanceSum = positions.stream().mapToDouble(TimedPosition::getRadius).sum();
+    double[] ratios = positions.stream().mapToDouble(p -> p.getRadius() / distanceSum).toArray();
+    TimedPosition start = TimedPosition.mean((TimedPosition[]) positions.toArray(), ratios);
 
     LeastSquaresProblem problem = new LeastSquaresBuilder()
         .checkerPair(new SimpleVectorValueChecker(1e-8, 1e-8))

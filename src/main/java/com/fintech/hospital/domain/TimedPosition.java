@@ -1,7 +1,5 @@
 package com.fintech.hospital.domain;
 
-import org.apache.commons.lang3.ArrayUtils;
-
 import java.util.Arrays;
 import java.util.Date;
 
@@ -21,17 +19,30 @@ public class TimedPosition {
   public TimedPosition() {
   }
 
-  public TimedPosition(AP ap, long timestamp) {
+  public TimedPosition(AP ap, long timestamp, double radius) {
     this.gps = ap.getGps();
     this.floor = ap.getFloor();
     this.ap = ap.getAlias();
     this.timestamp = timestamp;
+    this.radius = radius;
   }
 
+  /**
+   * search radius centering@gps
+   */
+  private Double radius;
   private LngLat gps;
   private Integer floor;
   private String ap;
   private long timestamp;
+
+  public Double getRadius() {
+    return radius;
+  }
+
+  public void setRadius(Double radius) {
+    this.radius = radius;
+  }
 
   public Integer getFloor() {
     return floor;
@@ -76,13 +87,14 @@ public class TimedPosition {
       throw new IllegalArgumentException("pos and ratio size should match: pos="
           + allpos.length + ", ratios=" + ratios.length);
     }
-    double time = 0.0, lng = 0.0, lat = 0.0, maxratio = 0.0;
+    double time = 0.0, lng = 0.0, lat = 0.0, radius = 0.0, maxratio = 0.0;
     int nearestAPIndex = 0;
     for (int i = 0; i < allpos.length; i++) {
       time += allpos[i].getTimestamp() * ratios[i];
-      lng = +allpos[i].getGps().getLng() * ratios[i];
-      lat = +allpos[i].getGps().getLat() * ratios[i];
-      if(ratios[i]>maxratio){
+      lng += allpos[i].getGps().getLng() * ratios[i];
+      lat += allpos[i].getGps().getLat() * ratios[i];
+      radius += allpos[i].getRadius() * ratios[i];
+      if (ratios[i] > maxratio) {
         maxratio = ratios[i];
         nearestAPIndex = i;
       }
@@ -90,7 +102,7 @@ public class TimedPosition {
     nearestAP.setGps(lng, lat);
     nearestAP.setAlias(allpos[nearestAPIndex].getAp());
     nearestAP.setFloor(allpos[nearestAPIndex].getFloor());
-    return new TimedPosition(nearestAP, (long) time);
+    return new TimedPosition(nearestAP, (long) time, radius);
   }
 
 }

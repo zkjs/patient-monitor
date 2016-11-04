@@ -1,6 +1,5 @@
 package com.fintech.hospital.api;
 
-import com.alibaba.fastjson.JSON;
 import com.fintech.hospital.push.PushService;
 import com.fintech.hospital.push.model.PushMsg;
 import org.slf4j.Logger;

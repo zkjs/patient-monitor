@@ -1,6 +1,5 @@
 package com.fintech.hospital.api;
 
-import com.alibaba.fastjson.JSONObject;
 import com.fintech.hospital.data.MongoDB;
 import com.fintech.hospital.domain.AP;
 import com.fintech.hospital.domain.BraceletPosition;
@@ -25,24 +24,24 @@ public class BraceletTrackRest {
   @GetMapping("{bid}")
   public Object tracks(@PathVariable("bid") String bracelet) {
     BraceletPosition position = mongo.getBraceletTrack(bracelet);
-    if(position==null) return "{'status': 'err', 'error': 'bracelet not found'}";
+    if (position == null) return "{'status': 'err', 'error': 'bracelet not found'}";
     return ImmutableMap.of(
         "list", position.getPosition()
     );
   }
 
   @GetMapping("{bid}/last")
-  public Object lastPosition(@PathVariable("bid") String bracelet){
+  public Object lastPosition(@PathVariable("bid") String bracelet) {
     BraceletPosition position = mongo.getBraceletTrack(bracelet);
-    if(position==null) return "{'status': 'err', 'error': 'bracelet not found'}";
-    TimedPosition pos = position.getPosition().get(position.getPosition().size()-1);
+    if (position == null) return "{'status': 'err', 'error': 'bracelet not found'}";
+    TimedPosition pos = position.getPosition().get(position.getPosition().size() - 1);
     AP ap = mongo.getAP(pos.getAp());
-    return ap==null? ImmutableMap.of(
+    return ap == null ? ImmutableMap.of(
         "timestamp", pos.getTimestamp(),
         "gps", pos.getGps()
     ) : ImmutableMap.of(
-        "address", ap.getAddress()==null?"":ap.getAddress(),
-        "floor", ap.getFloor()==null?"":ap.getFloor(),
+        "address", ap.getAddress() == null ? "" : ap.getAddress(),
+        "floor", ap.getFloor() == null ? "" : ap.getFloor(),
         "timestamp", pos.getTimestamp(),
         "gps", pos.getGps()
     );

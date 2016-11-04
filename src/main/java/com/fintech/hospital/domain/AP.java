@@ -71,7 +71,7 @@ public class AP {
   }
 
 
-  public void setGps(double longitude, double latitude){
+  public void setGps(double longitude, double latitude) {
     this.longitude = longitude;
     this.latitude = latitude;
   }
