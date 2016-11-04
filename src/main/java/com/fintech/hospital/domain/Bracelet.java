@@ -47,7 +47,7 @@ public class Bracelet {
     setStatus(1);
   }
 
-  public void unbindPatient(){
+  public void unbindPatient() {
     setPatientName(null);
     setPatientDBGender(null);
     setPatientRemark(null);
@@ -64,8 +64,8 @@ public class Bracelet {
   }
 
   public void setPatientDBGender(String patientDBGender) {
-    if("M".equals(patientDBGender)) this.patientGender = "1";
-    else if("F".equals(patientDBGender)) this.patientGender = "0";
+    if ("M".equals(patientDBGender)) this.patientGender = "1";
+    else if ("F".equals(patientDBGender)) this.patientGender = "0";
     this.patientDBGender = patientDBGender;
   }
 
@@ -93,6 +93,17 @@ public class Bracelet {
   @Size(max = 8)
   private String patientRoom;
 
+  @Size(min = 1, max = 3)
+  private String patientAge;
+
+  public String getPatientAge() {
+    return patientAge;
+  }
+
+  public void setPatientAge(String patientAge) {
+    this.patientAge = patientAge;
+  }
+
   public String getPatientRoom() {
     return patientRoom;
   }
@@ -118,14 +129,14 @@ public class Bracelet {
   }
 
   public String getPatientGender() {
-    if("M".equals(patientDBGender)) this.patientGender = "1";
-    else if("F".equals(patientDBGender)) this.patientGender = "0";
+    if ("M".equals(patientDBGender)) this.patientGender = "1";
+    else if ("F".equals(patientDBGender)) this.patientGender = "0";
     return patientGender;
   }
 
   public void setPatientGender(String patientGender) {
-    if("1".equals(patientGender)) this.patientDBGender = "M";
-    else if("0".equals(patientGender)) this.patientDBGender = "F";
+    if ("1".equals(patientGender)) this.patientDBGender = "M";
+    else if ("0".equals(patientGender)) this.patientDBGender = "F";
     this.patientGender = patientGender;
   }
 

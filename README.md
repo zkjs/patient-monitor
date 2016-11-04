@@ -73,7 +73,8 @@
         "bracelet": "581b1a6542aa101eebc77e60",
         "patientName": "Wang Nima",
         "patientGender": "1",
-        "patientRemark": "remark",
+        "patientAge": 32,
+        "patientRemark": "leg broken",
         "patientRoom": "302",
         "patientPhone": "13800138000"
       }
@@ -129,6 +130,7 @@
           "name": "82",
           "patientName": "Wang Nima",
           "patientGender": "1",
+          "patientAge": 32,
           "patientRoom": "320",
           "patientRemark": "leg broken",
           "patientPhone": "13800138000"
