@@ -104,7 +104,7 @@ public class YunbaConsumer4AP extends YunbaConsumer {
       mongo.addBraceletPosition(bracelet, braceletPosition);
       LOG.info("new position {} for bracelet {} ", braceletPosition, bracelet);
     }).exceptionally(t -> {
-      LOG.error("Err({})...: ", bracelet, t);
+      LOG.error("bracelet " + bracelet + " err...: ", t);
       return null;
     });
 

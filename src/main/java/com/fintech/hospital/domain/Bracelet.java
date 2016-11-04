@@ -90,6 +90,17 @@ public class Bracelet {
   @Digits(integer = 11, fraction = 0)
   private String patientPhone;
 
+  @Size(max = 8)
+  private String patientRoom;
+
+  public String getPatientRoom() {
+    return patientRoom;
+  }
+
+  public void setPatientRoom(String patientRoom) {
+    this.patientRoom = patientRoom;
+  }
+
   public Integer getStatus() {
     return status;
   }

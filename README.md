@@ -26,7 +26,7 @@
   - request body
   
       {
-        "apid": "83",
+        "apid": "ap110",
         "response": "doctorid"
       }
 
@@ -70,10 +70,11 @@
   - request body (gender: 0-female, 1-male)
 
       {
-        "bracelet": "83",
+        "bracelet": "581b1a6542aa101eebc77e60",
         "patientName": "Wang Nima",
         "patientGender": "1",
         "patientRemark": "remark",
+        "patientRoom": "302",
         "patientPhone": "13800138000"
       }
 
@@ -89,7 +90,8 @@
 
       {
         "patientName": "Wang Nima"
-        "patientGender": "1"
+        "patientGender": "1",
+        "patientRoom": "302"
       }
 
   - response body
@@ -127,7 +129,8 @@
           "name": "82",
           "patientName": "Wang Nima",
           "patientGender": "1",
-          "patientRemark": "remark",
+          "patientRoom": "320",
+          "patientRemark": "leg broken",
           "patientPhone": "13800138000"
         }]
        }
