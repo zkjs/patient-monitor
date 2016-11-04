@@ -44,6 +44,8 @@ public class Bracelet {
     setPatientDBGender(bracelet.patientDBGender);
     setPatientRemark(bracelet.patientRemark);
     setPatientPhone(bracelet.patientPhone);
+    setPatientRoom(bracelet.patientRoom);
+    setPatientAge(bracelet.patientAge);
     setStatus(1);
   }
 
