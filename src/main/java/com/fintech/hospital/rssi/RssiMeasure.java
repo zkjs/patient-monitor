@@ -34,7 +34,7 @@ public class RssiMeasure {
   }
 
   public static TimedPosition positioning(List<TimedPosition> positions, String bracelet, boolean euclidean) {
-    Logger LOG = LoggerFactory.getLogger("Positioning");
+    Logger LOG = LoggerFactory.getLogger(RssiMeasure.class);
     final Vector2D[] observes = (Vector2D[]) positions.stream().map(p -> p.getGps().vector()).toArray();
 
     MultivariateJacobianFunction distancesToCurrentCenter = point -> {
