@@ -79,7 +79,7 @@ public class YunbaConsumer4AP extends YunbaConsumer {
         List<TimedPosition> positionList = mongo.getBraceletTrack(braceletId).getPosition();
         apMsg.setPosition(positionList.get(positionList.size() - 1));
         apMsg.setBracelet(braceletId);
-        String alertMsg = String.format("%s 求救@%s", bracelet.getPatientName(), ap.getAddress());
+        String alertMsg = String.format("%s (%s) 求救 ", bracelet.getPatientName(), apMsg.braceletBleId());
         apMsg.setMessage(alertMsg);
         String broadcast = JSON.toJSONString(apMsg);
         pushService.push2Mon(new PushMsg(BROADCAST, RESCUE_TOPIC, broadcast, new YunbaOpts(new YunbaOpts.YunbaAps(

@@ -20,6 +20,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.springframework.data.mongodb.core.query.Criteria.where;
 
@@ -137,8 +138,11 @@ public class MongoDB {
 
     long _24HoursAgo = Instant.now().minus(1, ChronoUnit.DAYS).toEpochMilli();
     Criteria matchingCriteria = Criteria.where("bracelet").is(bracelet)
-        .and("create_on").gt(new Date(_24HoursAgo));
+        .and("create").gt(new Date(_24HoursAgo));
     MatchOperation matchBracelet = new MatchOperation(matchingCriteria);
-    return template.aggregate(Aggregation.newAggregation(matchBracelet, GROUP_BY_AP), DB_BT, String.class).getMappedResults();
+    List<SimpleProjection> results =
+        template.aggregate(Aggregation.newAggregation(matchBracelet, GROUP_BY_AP), DB_BT, SimpleProjection.class)
+            .getMappedResults();
+    return results.stream().map(SimpleProjection::getId).collect(Collectors.toList());
   }
 }
