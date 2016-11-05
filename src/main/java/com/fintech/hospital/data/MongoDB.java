@@ -140,9 +140,9 @@ public class MongoDB {
     Criteria matchingCriteria = Criteria.where("bracelet").is(bracelet)
         .and("create").gt(new Date(_24HoursAgo));
     MatchOperation matchBracelet = new MatchOperation(matchingCriteria);
-    List<SimpleProjection> results =
-        template.aggregate(Aggregation.newAggregation(matchBracelet, GROUP_BY_AP), DB_BT, SimpleProjection.class)
+    List<SProjection> results =
+        template.aggregate(Aggregation.newAggregation(matchBracelet, GROUP_BY_AP), DB_BT, SProjection.class)
             .getMappedResults();
-    return results.stream().map(SimpleProjection::getId).collect(Collectors.toList());
+    return results.stream().map(SProjection::getId).collect(Collectors.toList());
   }
 }

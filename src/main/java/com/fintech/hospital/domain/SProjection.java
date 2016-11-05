@@ -5,7 +5,7 @@ import org.springframework.data.annotation.Id;
 /**
  * @author baoqiang
  */
-public class SimpleProjection {
+public class SProjection {
   @Id
   private String id;
 
