@@ -47,7 +47,8 @@ public class YunbaConsumer4AP extends YunbaConsumer {
   @Autowired
   private Cache cache;
 
-  final RssiDistanceModel RSSI_MODEL = new RssiDistanceModel(-0.8204588, 2.1541073, 5.6846953, -60);
+//  final RssiDistanceModel RSSI_MODEL = new RssiDistanceModel(-0.8204588, 2.1541073, 5.6846953, -60);
+  final RssiDistanceModel RSSI_MODEL = new RssiDistanceModel(0.1820634, 0.8229884, 6.6525179, -75);
 
   @Value("${yunba.rescue.topic}")
   private String RESCUE_TOPIC;
