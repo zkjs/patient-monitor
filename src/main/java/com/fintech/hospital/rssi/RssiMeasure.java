@@ -117,15 +117,15 @@ public class RssiMeasure {
     LeastSquaresOptimizer.Optimum optimum = new LevenbergMarquardtOptimizer().optimize(problem);
     double[] eval = optimum.getPoint().toArray();
     LngLat center = new LngLat(
-        pixelScaleAndOrigin[0]*eval[0] + pixelScaleAndOrigin[0],
-        pixelScaleAndOrigin[0]*eval[1] + pixelScaleAndOrigin[1]
+        pixelScaleAndOrigin[0]/eval[0] + pixelScaleAndOrigin[0],
+        pixelScaleAndOrigin[0]/eval[1] + pixelScaleAndOrigin[1]
     );
-    LOG.debug("{} fitted center: [{}, {}]", bracelet, center.getLng(), center.getLat());
+    start.setRadius(start.getRadius()*pixelScaleAndOrigin[3]/pixelScaleAndOrigin[0]);
+    start.setGps(center);
+    LOG.debug("{} fitted center: [{}, {}] (radius: {})", bracelet, center.getLng(), center.getLat(), start.getRadius());
     LOG.info("{} positioning starting@{}, RMS: {}", bracelet, center, optimum.getRMS());
     LOG.debug("{} evaluations: {}", bracelet, optimum.getEvaluations());
     LOG.debug("{} iterations: {}", bracelet, optimum.getIterations());
-    start.setGps(center);
-    start.setRadius(start.getRadius()*pixelScaleAndOrigin[3]/pixelScaleAndOrigin[0]);
     return start;
   }
 
