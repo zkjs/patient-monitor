@@ -67,8 +67,8 @@ public class RssiMeasure {
     double distanceSum = positions.stream().mapToDouble(TimedPosition::getRadius).sum();
     double ratioSum = positions.stream().mapToDouble(p->distanceSum-p.getRadius()).sum();
     double[] ratios = positions.stream().mapToDouble(p -> (distanceSum - p.getRadius()) / ratioSum).toArray();
-    TimedPosition start = positions.stream().min((p1,p2)-> p1.getRadius()>p2.getRadius()?1:-1).get();
-        //TimedPosition.mean(positions, ratios);
+    TimedPosition start = TimedPosition.mean(positions, ratios);
+    //positions.stream().min((p1,p2)-> p1.getRadius()>p2.getRadius()?1:-1).get();
 
     LOG.debug("position evaluation starting from {}", start);
     LOG.debug("targeting {}, ratios: {}", Arrays.toString(prescribedDistance));
