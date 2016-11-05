@@ -106,7 +106,7 @@ public class RssiMeasure {
     };
 
     LeastSquaresProblem problem = new LeastSquaresBuilder()
-        .checkerPair(new SimpleVectorValueChecker(1e-1, start.getRadius()/2))
+        .checkerPair(new SimpleVectorValueChecker(1e-7, 1e-6))
         .model(distancesToCurrentCenter)
         .maxEvaluations(200)
         .maxIterations(200)
@@ -118,8 +118,8 @@ public class RssiMeasure {
     double[] eval = optimum.getPoint().toArray();
     LOG.debug("{} fitted center: {} (radius: {})", bracelet, Arrays.toString(eval), start.getRadius());
     LngLat center = new LngLat(
-        lnglatDistance(pixelScaleAndOrigin[0]/eval[0]) + pixelScaleAndOrigin[1],
-        lnglatDistance(pixelScaleAndOrigin[0]/eval[1]) + pixelScaleAndOrigin[2]
+        5*lnglatDistance(pixelScaleAndOrigin[0]/eval[0]) + pixelScaleAndOrigin[1],
+        5*lnglatDistance(pixelScaleAndOrigin[0]/eval[1]) + pixelScaleAndOrigin[2]
     );
     start.setRadius(start.getRadius()*pixelScaleAndOrigin[3]/pixelScaleAndOrigin[0]);
     start.setGps(center);
