@@ -1,5 +1,7 @@
 package com.fintech.hospital.domain;
 
+import com.fintech.hospital.rssi.RssiDistanceModel;
+
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -17,17 +19,21 @@ public class TimedPosition {
     );
   }
 
+  final RssiDistanceModel RSSI_MODEL = new RssiDistanceModel(0.1820634, 1.9229884, 6.4525179, -75);
+
   public TimedPosition() {
   }
 
-  public TimedPosition(AP ap, long timestamp, double radius) {
+  public TimedPosition(AP ap, long timestamp, double rssi) {
     this.gps = ap.getGps();
     this.floor = ap.getFloor();
     this.ap = ap.getAlias();
     this.timestamp = timestamp;
-    this.radius = radius;
+    this.radius = RSSI_MODEL.distance(rssi);
+    this.rssi = rssi;
   }
 
+  private Double rssi;
   /**
    * search radius centering@gps
    */
@@ -36,6 +42,15 @@ public class TimedPosition {
   private Integer floor;
   private String ap;
   private long timestamp;
+
+  public Double getRssi() {
+    return rssi;
+  }
+
+  public void setRssi(Double rssi) {
+    this.rssi = rssi;
+    this.radius = RSSI_MODEL.distance(rssi);
+  }
 
   public Double getRadius() {
     return radius;

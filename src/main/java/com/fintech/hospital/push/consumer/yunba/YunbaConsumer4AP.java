@@ -10,7 +10,6 @@ import com.fintech.hospital.domain.TimedPosition;
 import com.fintech.hospital.push.PushService;
 import com.fintech.hospital.push.model.PushMsg;
 import com.fintech.hospital.push.supplier.yunba.YunbaOpts;
-import com.fintech.hospital.rssi.RssiDistanceModel;
 import com.fintech.hospital.rssi.RssiMeasure;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -46,10 +45,6 @@ public class YunbaConsumer4AP extends YunbaConsumer {
 
   @Autowired
   private Cache cache;
-
-  final RssiDistanceModel RSSI_MODEL = new RssiDistanceModel(0.1820634, 1.9229884, 6.4525179, -75);
-//  final RssiDistanceModel RSSI_MODEL = new RssiDistanceModel(-0.8204588, 2.1541073, 5.6846953, -60);
-//  final RssiDistanceModel RSSI_MODEL = new RssiDistanceModel(0.1820634, 0.8229884, 6.6525179, -75);
 
   @Value("${yunba.rescue.topic}")
   private String RESCUE_TOPIC;
@@ -95,7 +90,7 @@ public class YunbaConsumer4AP extends YunbaConsumer {
       ));
       /* pop all latest positions */
       return supplyAsync(() ->
-          cache.push(braceletId, ap.getAlias(), new TimedPosition(ap, current, RSSI_MODEL.distance(apMsg.getRssi())))
+          cache.push(braceletId, ap.getAlias(), new TimedPosition(ap, current, apMsg.getRssi()))
       );
     }).thenAccept(positions -> {
       /* cache bandid, lnglatDistance and ap lnglat to list */

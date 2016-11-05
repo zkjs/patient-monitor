@@ -28,7 +28,12 @@ public class Cache {
         return null;
       }
     }
+    TimedPosition previousPos = c.data.get(apid);
+    if(previousPos!=null){
+      pos.setRssi(previousPos.getRssi() - 0.8 * (previousPos.getRssi() -pos.getRssi()));
+    }
     c.data.put(apid, pos);
+
     if (c.data.size() > 4 || expired(c.timestamp)) {
       c = CACHE.remove(bracelet);
       return new ArrayList<>(c.data.values());
