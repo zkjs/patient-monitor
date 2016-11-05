@@ -72,7 +72,7 @@ public class RssiMeasure {
     LOG.debug("position evaluation starting from {}", start);
     LOG.debug("targeting {}, ratios: {}", Arrays.toString(prescribedDistance));
     LeastSquaresProblem problem = new LeastSquaresBuilder()
-        .checkerPair(new SimpleVectorValueChecker(1e-8, 1e-7))
+        .checkerPair(new SimpleVectorValueChecker(2*1e-6, 1e-5))
         .model(distancesToCurrentCenter)
         .maxEvaluations(300)
         .maxIterations(300)
