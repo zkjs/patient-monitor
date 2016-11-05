@@ -106,7 +106,7 @@ public class YunbaConsumer4AP extends YunbaConsumer {
           break;
         default:
           BraceletPosition pos = mongo.getBraecletLastPos(braceletId);
-          braceletPosition = RssiMeasure.positioning(positions, braceletId, pos.getPosition().get(0), USE_EUCLIDEAN);
+          braceletPosition = RssiMeasure.positioning(positions, braceletId, pos==null?null:pos.getPosition().get(0), USE_EUCLIDEAN);
           break;
       }
       mongo.addBraceletPosition(braceletId, braceletPosition);

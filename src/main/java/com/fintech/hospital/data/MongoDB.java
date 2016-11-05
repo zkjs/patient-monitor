@@ -79,7 +79,7 @@ public class MongoDB {
 
   public BraceletPosition getBraecletLastPos(String bracelet){
     Query query = new Query(where("_id").is(bracelet));
-    query.fields().slice("position", -1, 1);
+    query.fields().slice("position", -2, 1);
     return template.findOne(
         query,
         BraceletPosition.class,
