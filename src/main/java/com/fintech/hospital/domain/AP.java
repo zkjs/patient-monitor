@@ -1,5 +1,6 @@
 package com.fintech.hospital.domain;
 
+import com.alibaba.fastjson.annotation.JSONField;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Field;
@@ -11,17 +12,22 @@ import java.util.Date;
  */
 public class AP {
 
+  @JSONField(serialize = false)
   @Id
   private ObjectId id;
 
+  @JSONField(serialize = false)
   private Double longitude;
+  @JSONField(serialize = false)
   private Double latitude;
 
   private String address;
   private Integer floor;
   @Field("name")
   private String alias;
+  @JSONField(serialize = false)
   private Integer status;
+  @JSONField(serialize = false)
   @Field("create_on")
   private Date create;
 

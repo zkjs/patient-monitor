@@ -60,11 +60,17 @@
         "status": "ok",
         "data": {
           "list": [{
-            "ap": "nearest ap addr",
+            "ap": "ap112",
             "floor": 2,
             "timestamp": 1478159590006,
             "radius": 23.121,
             "gps": {"lng" : 10.0, "lat" : 0.641574}
+          }],
+          "aps": [{
+            "address": "middle",
+            "alias": "ap112",
+            "floor": 2,
+            "gps": {"lng": 12.212, "lat": 11.231}
           }]
       }
 

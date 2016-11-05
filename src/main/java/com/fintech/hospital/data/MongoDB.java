@@ -111,4 +111,11 @@ public class MongoDB {
     return let;
   }
 
+  public List<AP> getAPByNames(List<String> aps) {
+    return template.find(
+        new Query(where("name").in(aps)),
+        AP.class,
+        DB_AP
+    );
+  }
 }

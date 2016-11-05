@@ -11,6 +11,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import static com.fintech.hospital.rssi.RssiMeasure.transform2RelativeCoords;
 
 /**
@@ -53,9 +56,12 @@ public class BraceletTrackRest {
   public Object tracksRelativeCoords(@PathVariable("bid") String bracelet) {
     BraceletPosition position = mongo.getBraceletTrack(bracelet);
     if (position == null) return "{'status': 'err', 'error': 'bracelet not found'}";
-    transform2RelativeCoords(position.getPosition());
+    List<String> aps = position.getPosition().stream().map(TimedPosition::getAp).distinct().collect(Collectors.toList());
+    List<AP> apList = mongo.getAPByNames(aps);
+    transform2RelativeCoords(position.getPosition(), apList);
     return ImmutableMap.of(
-        "list", position.getPosition()
+        "list", position.getPosition(),
+        "aps", apList
     );
   }
 

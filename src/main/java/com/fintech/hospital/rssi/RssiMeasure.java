@@ -1,5 +1,6 @@
 package com.fintech.hospital.rssi;
 
+import com.fintech.hospital.domain.AP;
 import com.fintech.hospital.domain.LngLat;
 import com.fintech.hospital.domain.TimedPosition;
 import org.apache.commons.math3.fitting.leastsquares.*;
@@ -17,6 +18,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author baoqiang
@@ -96,23 +98,38 @@ public class RssiMeasure {
     return E_QUATORIAL_EARTH_RADIUS * c;
   }
 
-  public static void transform2RelativeCoords(List<TimedPosition> points) {
-    Vector2D gcenter = points.stream().map(p -> p.getGps().vector())
-        .reduce(new Vector2D(0, 0), Vector2D::add).scalarMultiply(1.0 / points.size());
-    double scale = 96000 / points.stream().mapToDouble(p -> distance(gcenter, p.getGps().vector())).max().getAsDouble();
-    Vector2D originCoord = points.stream().map(p->p.getGps().vector()).reduce(new Vector2D(0, 0), (origin, v)->{
-      double x = origin.getX()>v.getX()?v.getX():origin.getX(),
-          y = origin.getY()>v.getY()?origin.getY():v.getY();
+  public static void transform2RelativeCoords(List<TimedPosition> points, List<AP> apList) {
+
+    Vector2D originCoord = Stream.concat(
+        points.stream().map(p -> p.getGps().vector()),
+        apList.stream().map(ap->new Vector2D(ap.getLongitude(), ap.getLatitude()))
+    ).reduce(new Vector2D(Double.MAX_VALUE, Double.MIN_VALUE), (origin, v) -> {
+      double x = origin.getX() > v.getX() ? v.getX() : origin.getX(),
+          y = origin.getY() > v.getY() ? origin.getY() : v.getY();
       return new Vector2D(x, y);
     });
-    points.stream().forEach(p -> p.getGps().set(
-        scale * (originCoord.getX() - p.getGps().getLng() + gcenter.getX()),
-        scale * (originCoord.getY() - p.getGps().getLat() - gcenter.getY()))
-    );
+
+     Vector2D gcenter = points.stream().map(p -> p.getGps().vector())
+         .reduce(new Vector2D(0, 0), Vector2D::add).scalarMultiply(1.0 / points.size());
+
+    double pixelScale = 960/(2*distance(gcenter, originCoord));
+    points.forEach(p -> p.getGps().set(
+        pixelScale * distance(new Vector2D(p.getGps().getLng(), 0), new Vector2D(originCoord.getX(), 0)) ,
+        pixelScale * distance(new Vector2D(0, originCoord.getY()), new Vector2D(0, p.getGps().getLat()))
+    ));
+
+    apList.stream().forEach(ap -> ap.setGps(
+        pixelScale * distance(new Vector2D(ap.getLongitude(), 0), new Vector2D(originCoord.getX(),0)),
+        pixelScale * distance(new Vector2D(0, originCoord.getY()), new Vector2D(0, ap.getLatitude()))
+    ));
   }
 
   private static double lnglatDistance(double distance) {
     return distance * 180 / (Math.PI * E_QUATORIAL_EARTH_RADIUS);
+  }
+
+  private static double euclideanDistance(double lnglatDistance) {
+    return lnglatDistance * Math.PI * E_QUATORIAL_EARTH_RADIUS / 180;
   }
 
 }
