@@ -33,6 +33,13 @@ public class TimedPosition {
     this.rssi = rssi;
   }
 
+  public TimedPosition(AP ap, long timestamp){
+    this.gps = ap.getGps();
+    this.floor = ap.getFloor();
+    this.ap = ap.getAlias();
+    this.timestamp = timestamp;
+  }
+
   private Double rssi;
   /**
    * search radius centering@gps
@@ -118,7 +125,9 @@ public class TimedPosition {
     nearestAP.setGps(lng, lat);
     nearestAP.setAlias(allpos.get(nearestAPIndex).getAp());
     nearestAP.setFloor(allpos.get(nearestAPIndex).getFloor());
-    return new TimedPosition(nearestAP, (long) time, radius);
+    TimedPosition meaned = new TimedPosition(nearestAP, (long) time);
+    meaned.setRadius(radius);
+    return meaned;
   }
 
 }
