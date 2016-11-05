@@ -16,6 +16,7 @@ public class APMsg {
   private String alert;
   private String address;
   private Integer floor;
+  private String message;
 
   private TimedPosition position;
 
@@ -24,6 +25,14 @@ public class APMsg {
   public void fillAP(AP ap) {
     this.address = ap.getAddress();
     this.floor = ap.getFloor();
+  }
+
+  public String getMessage() {
+    return message;
+  }
+
+  public void setMessage(String message) {
+    this.message = message;
   }
 
   public TimedPosition getPosition() {
@@ -92,7 +101,7 @@ public class APMsg {
     }
   }
 
-  public String bracelet() {
+  public String braceletBleId() {
     return bandId;
   }
 

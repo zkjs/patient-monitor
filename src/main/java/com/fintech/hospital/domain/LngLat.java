@@ -28,7 +28,7 @@ public class LngLat {
     this.lat = lnglat[1];
   }
 
-  public void set(double lng, double lat){
+  public void set(double lng, double lat) {
     this.lng = lng;
     this.lat = lat;
   }

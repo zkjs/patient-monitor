@@ -176,6 +176,7 @@
           "floor": 2,
           "address": "West 208",
           "alert": "y",
+          "message": "someone's calling for help",
           "payload": "126683000000",
           "bracelet": "581b1a6542aa101eebc77e60",
           "position": {

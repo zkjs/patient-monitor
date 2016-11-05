@@ -102,24 +102,24 @@ public class RssiMeasure {
 
     Vector2D originCoord = Stream.concat(
         points.stream().map(p -> p.getGps().vector()),
-        apList.stream().map(ap->new Vector2D(ap.getLongitude(), ap.getLatitude()))
+        apList.stream().map(ap -> new Vector2D(ap.getLongitude(), ap.getLatitude()))
     ).reduce(new Vector2D(Double.MAX_VALUE, Double.MIN_VALUE), (origin, v) -> {
       double x = origin.getX() > v.getX() ? v.getX() : origin.getX(),
           y = origin.getY() > v.getY() ? origin.getY() : v.getY();
       return new Vector2D(x, y);
     });
 
-     Vector2D gcenter = points.stream().map(p -> p.getGps().vector())
-         .reduce(new Vector2D(0, 0), Vector2D::add).scalarMultiply(1.0 / points.size());
+    Vector2D gcenter = apList.stream().map(p -> p.getGps().vector())
+        .reduce(new Vector2D(0, 0), Vector2D::add).scalarMultiply(1.0 / points.size());
 
-    double pixelScale = 960/(2*distance(gcenter, originCoord));
+    double pixelScale = 960 / (2 * distance(gcenter, originCoord));
     points.forEach(p -> p.getGps().set(
-        pixelScale * distance(new Vector2D(p.getGps().getLng(), 0), new Vector2D(originCoord.getX(), 0)) ,
+        pixelScale * distance(new Vector2D(p.getGps().getLng(), 0), new Vector2D(originCoord.getX(), 0)),
         pixelScale * distance(new Vector2D(0, originCoord.getY()), new Vector2D(0, p.getGps().getLat()))
     ));
 
     apList.stream().forEach(ap -> ap.setGps(
-        pixelScale * distance(new Vector2D(ap.getLongitude(), 0), new Vector2D(originCoord.getX(),0)),
+        pixelScale * distance(new Vector2D(ap.getLongitude(), 0), new Vector2D(originCoord.getX(), 0)),
         pixelScale * distance(new Vector2D(0, originCoord.getY()), new Vector2D(0, ap.getLatitude()))
     ));
   }

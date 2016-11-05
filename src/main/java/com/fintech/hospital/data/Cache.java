@@ -1,7 +1,6 @@
 package com.fintech.hospital.data;
 
 import com.fintech.hospital.domain.TimedPosition;
-import org.apache.commons.math3.util.Pair;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -18,7 +17,7 @@ public class Cache {
   @Value("${cache.position.expire}")
   private long PERIOD;
 
-  public List<TimedPosition> push(String bracelet, String apid, TimedPosition pos){
+  public List<TimedPosition> push(String bracelet, String apid, TimedPosition pos) {
     BraceletPosCache c = CACHE.get(bracelet);
     synchronized (CACHE) {
       if (c == null) {

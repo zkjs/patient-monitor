@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.fintech.hospital.data.Cache;
 import com.fintech.hospital.data.MongoDB;
 import com.fintech.hospital.domain.APMsg;
+import com.fintech.hospital.domain.Bracelet;
 import com.fintech.hospital.domain.BraceletTrace;
 import com.fintech.hospital.domain.TimedPosition;
 import com.fintech.hospital.push.PushService;
@@ -11,7 +12,6 @@ import com.fintech.hospital.push.model.PushMsg;
 import com.fintech.hospital.push.supplier.yunba.YunbaOpts;
 import com.fintech.hospital.rssi.RssiDistanceModel;
 import com.fintech.hospital.rssi.RssiMeasure;
-import com.google.common.collect.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
@@ -64,7 +64,8 @@ public class YunbaConsumer4AP extends YunbaConsumer {
     APMsg apMsg = JSON.parseObject(msg, APMsg.class);
 
     final long current = System.currentTimeMillis();
-    final String bracelet = mongo.getBracelet(apMsg.bracelet()).getId().toHexString();
+    final Bracelet bracelet = mongo.getBracelet(apMsg.braceletBleId());
+    final String braceletId = bracelet.getId().toHexString();
 
     /* query ap */
     supplyAsync(() -> mongo.getAP(apMsg.getApid())
@@ -73,23 +74,26 @@ public class YunbaConsumer4AP extends YunbaConsumer {
 
       /* categorize msg type: urgency (push to mon immediately for alert), tracing */
       if (apMsg.urgent()) {
-        LOG.info("band {} in emergency, detected by ap {}", apMsg.bracelet(), apMsg.getApid());
+        LOG.info("bracelet {}(BLE-ID) in emergency, detected by ap {}", apMsg.braceletBleId(), apMsg.getApid());
         apMsg.fillAP(ap);
-        List<TimedPosition> positionList = mongo.getBraceletTrack(bracelet).getPosition();
-        apMsg.setPosition(positionList.get(positionList.size()-1));
+        List<TimedPosition> positionList = mongo.getBraceletTrack(braceletId).getPosition();
+        apMsg.setPosition(positionList.get(positionList.size() - 1));
+        apMsg.setBracelet(braceletId);
+        String alertMsg = String.format("%s 求救@%s", bracelet.getPatientName(), ap.getAddress());
+        apMsg.setMessage(alertMsg);
         String broadcast = JSON.toJSONString(apMsg);
         pushService.push2Mon(new PushMsg(BROADCAST, RESCUE_TOPIC, broadcast, new YunbaOpts(new YunbaOpts.YunbaAps(
-            broadcast, String.format("(%s)%s 位置有人呼救", apMsg.getApid(), ap.getAddress())
+            broadcast, alertMsg
         ))));
       }
 
       runAsync(() -> mongo.addBraceletTrace(
-          apMsg.bracelet(),
+          braceletId,
           new BraceletTrace(apMsg.getApid(), apMsg.getRssi(), ap.getGps())
       ));
       /* pop all latest positions */
       return supplyAsync(() ->
-          cache.push(bracelet, ap.getAlias(), new TimedPosition(ap, current, RSSI_MODEL.distance(apMsg.getRssi())))
+          cache.push(braceletId, ap.getAlias(), new TimedPosition(ap, current, RSSI_MODEL.distance(apMsg.getRssi())))
       );
     }).thenAccept(positions -> {
       /* cache bandid, lnglatDistance and ap lnglat to list */
@@ -104,13 +108,13 @@ public class YunbaConsumer4AP extends YunbaConsumer {
           TimedPosition pos0 = positions.get(0),
               pos1 = positions.get(1);
           double distRatio0 = pos0.getRadius() / (pos0.getRadius() + pos1.getRadius());
-          braceletPosition = mean(positions, new double[]{1- distRatio0, distRatio0});
+          braceletPosition = mean(positions, new double[]{1 - distRatio0, distRatio0});
           break;
         default:
-          braceletPosition = RssiMeasure.positioning(positions, bracelet, USE_EUCLIDEAN);
+          braceletPosition = RssiMeasure.positioning(positions, braceletId, USE_EUCLIDEAN);
           break;
       }
-      mongo.addBraceletPosition(bracelet, braceletPosition);
+      mongo.addBraceletPosition(braceletId, braceletPosition);
       LOG.info("new position {} for bracelet {} ", braceletPosition, bracelet);
     }).exceptionally(t -> {
       LOG.error("bracelet " + bracelet + " err...: ", t);
