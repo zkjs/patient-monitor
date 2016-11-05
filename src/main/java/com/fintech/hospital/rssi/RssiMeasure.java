@@ -117,8 +117,8 @@ public class RssiMeasure {
     LeastSquaresOptimizer.Optimum optimum = new LevenbergMarquardtOptimizer().optimize(problem);
     double[] eval = optimum.getPoint().toArray();
     LngLat center = new LngLat(
-        pixelScaleAndOrigin[0]/eval[0] + pixelScaleAndOrigin[0],
-        pixelScaleAndOrigin[0]/eval[1] + pixelScaleAndOrigin[1]
+        pixelScaleAndOrigin[0]/eval[0] + pixelScaleAndOrigin[1],
+        pixelScaleAndOrigin[0]/eval[1] + pixelScaleAndOrigin[2]
     );
     start.setRadius(start.getRadius()*pixelScaleAndOrigin[3]/pixelScaleAndOrigin[0]);
     start.setGps(center);
