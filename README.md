@@ -52,6 +52,24 @@
           }]
       }
 
+- bracelet tracks(relative coords) [GET /track/rel/{bracelet}]
+
+  - response body
+
+      {
+        "status": "ok",
+        "data": {
+          "list": [{
+            "ap": "nearest ap addr",
+            "floor": 2,
+            "timestamp": 1478159590006,
+            "radius": 23.121,
+            "gps": {"lng" : 10.0, "lat" : 0.641574}
+          }]
+      }
+
+
+
 - bracelet last position [GET /track/{bracelet}/last]
 
   - response body

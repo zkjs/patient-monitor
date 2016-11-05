@@ -28,6 +28,11 @@ public class LngLat {
     this.lat = lnglat[1];
   }
 
+  public void set(double lng, double lat){
+    this.lng = lng;
+    this.lat = lat;
+  }
+
   public double[] arr() {
     return new double[]{lng, lat};
   }

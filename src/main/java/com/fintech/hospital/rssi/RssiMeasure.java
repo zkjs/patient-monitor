@@ -2,9 +2,7 @@ package com.fintech.hospital.rssi;
 
 import com.fintech.hospital.domain.LngLat;
 import com.fintech.hospital.domain.TimedPosition;
-import com.google.common.collect.Lists;
 import org.apache.commons.math3.fitting.leastsquares.*;
-import org.apache.commons.math3.geometry.Vector;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.ArrayRealVector;
@@ -18,7 +16,6 @@ import org.slf4j.LoggerFactory;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.function.IntFunction;
 import java.util.stream.Collectors;
 
 /**
@@ -38,7 +35,7 @@ public class RssiMeasure {
     measures.put(unique, previousMeasure - 0.8 * (previousMeasure - rssi));
   }
 
-  private static final long E_QUATORIAL_EARTH_RADIUS = 63781370;
+  private static final long E_QUATORIAL_EARTH_RADIUS = 6378137;
 
   private static final double DEG_2_RAD = (Math.PI / 180D);
 
@@ -52,7 +49,7 @@ public class RssiMeasure {
       RealMatrix jacobian = new Array2DRowRealMatrix(observes.size(), 2);
       for (int i = 0; i < observes.size(); ++i) {
         Vector2D o = observes.get(i);
-        double modelI =  euclidean ? Vector2D.distance(o, center) : distance(o, center);
+        double modelI = euclidean ? Vector2D.distance(o, center) : distance(o, center);
         value.setEntry(i, modelI);
         jacobian.setEntry(i, 0, (center.getX() - o.getX()) / modelI);
         jacobian.setEntry(i, 1, (center.getY() - o.getY()) / modelI);
@@ -60,12 +57,12 @@ public class RssiMeasure {
       return new Pair<>(value, jacobian);
     };
 
-    double[] prescribedDistance = euclidean?
-        positions.stream().mapToDouble(TimedPosition::getRadius).toArray():
+    double[] prescribedDistance = euclidean ?
+        positions.stream().mapToDouble(TimedPosition::getRadius).toArray() :
         positions.stream().mapToDouble(p -> lnglatDistance(p.getRadius())).toArray();
 
     double distanceSum = positions.stream().mapToDouble(TimedPosition::getRadius).sum();
-    double[] ratios = positions.stream().mapToDouble(p -> (distanceSum-p.getRadius()) / distanceSum).toArray();
+    double[] ratios = positions.stream().mapToDouble(p -> (distanceSum - p.getRadius()) / distanceSum).toArray();
     TimedPosition start = TimedPosition.mean(positions, ratios);
 
     LOG.debug("position evaluation starting from {}", start);
@@ -89,7 +86,7 @@ public class RssiMeasure {
     return start;
   }
 
-  private static double distance(Vector2D o, Vector2D center){
+  private static double distance(Vector2D o, Vector2D center) {
     double dlong = (o.getX() - center.getX()) * DEG_2_RAD;
     double dlat = (o.getY() - center.getY()) * DEG_2_RAD;
     double a = Math.pow(Math.sin(dlat / 2D), 2D)
@@ -97,6 +94,21 @@ public class RssiMeasure {
         * Math.pow(Math.sin(dlong / 2D), 2D);
     double c = 2D * Math.atan2(Math.sqrt(a), Math.sqrt(1D - a));
     return E_QUATORIAL_EARTH_RADIUS * c;
+  }
+
+  public static void transform2RelativeCoords(List<TimedPosition> points) {
+    Vector2D gcenter = points.stream().map(p -> p.getGps().vector())
+        .reduce(new Vector2D(0, 0), Vector2D::add).scalarMultiply(1.0 / points.size());
+    double scale = 96000 / points.stream().mapToDouble(p -> distance(gcenter, p.getGps().vector())).max().getAsDouble();
+    Vector2D originCoord = points.stream().map(p->p.getGps().vector()).reduce(new Vector2D(0, 0), (origin, v)->{
+      double x = origin.getX()>v.getX()?v.getX():origin.getX(),
+          y = origin.getY()>v.getY()?origin.getY():v.getY();
+      return new Vector2D(x, y);
+    });
+    points.stream().forEach(p -> p.getGps().set(
+        scale * (originCoord.getX() - p.getGps().getLng() + gcenter.getX()),
+        scale * (originCoord.getY() - p.getGps().getLat() - gcenter.getY()))
+    );
   }
 
   private static double lnglatDistance(double distance) {
