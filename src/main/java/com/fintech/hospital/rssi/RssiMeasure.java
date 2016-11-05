@@ -106,23 +106,24 @@ public class RssiMeasure {
     };
 
     LeastSquaresProblem problem = new LeastSquaresBuilder()
-        .checkerPair(new SimpleVectorValueChecker(1e-6, 1e-6))
+        .checkerPair(new SimpleVectorValueChecker(1e-1, start.getRadius()/2))
         .model(distancesToCurrentCenter)
-        .maxEvaluations(100)
-        .maxIterations(100)
+        .maxEvaluations(200)
+        .maxIterations(200)
         .target(prescribedDistance)
         .lazyEvaluation(false)
         .start(start.getGps().arr())
         .build();
     LeastSquaresOptimizer.Optimum optimum = new LevenbergMarquardtOptimizer().optimize(problem);
     double[] eval = optimum.getPoint().toArray();
+    LOG.debug("{} fitted center: {} (radius: {})", bracelet, Arrays.toString(eval), start.getRadius());
     LngLat center = new LngLat(
         lnglatDistance(pixelScaleAndOrigin[0]/eval[0]) + pixelScaleAndOrigin[1],
         lnglatDistance(pixelScaleAndOrigin[0]/eval[1]) + pixelScaleAndOrigin[2]
     );
     start.setRadius(start.getRadius()*pixelScaleAndOrigin[3]/pixelScaleAndOrigin[0]);
     start.setGps(center);
-    LOG.debug("{} fitted center: [{}, {}] (radius: {})", bracelet, center.getLng(), center.getLat(), start.getRadius());
+    LOG.debug("{} fitted center: {} (radius: {})", bracelet, Arrays.toString(center.arr()), start.getRadius());
     LOG.info("{} positioning starting@{}, RMS: {}", bracelet, start.getGps(), optimum.getRMS());
     LOG.debug("{} evaluations: {}", bracelet, optimum.getEvaluations());
     LOG.debug("{} iterations: {}", bracelet, optimum.getIterations());
