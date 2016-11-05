@@ -67,9 +67,8 @@ public class MongoDB {
   }
 
   public BraceletPosition getBraceletTrack(String bracelet) {
-    long _30minAgo = Instant.now().minus(30, ChronoUnit.MINUTES).toEpochMilli();
-    Query query = new Query(where("_id").is(bracelet).and("create").gt(_30minAgo));
-    query.fields().slice("position", -30, 15);
+    Query query = new Query(where("_id").is(bracelet));
+    query.fields().slice("position", -30, 30);
     return template.findOne(
         query,
         BraceletPosition.class,
@@ -136,9 +135,9 @@ public class MongoDB {
 
   public List<String> tracedAP(String bracelet) {
 
-    long _30minAgo = Instant.now().minus(30, ChronoUnit.MINUTES).toEpochMilli();
+    long _24HoursAgo = Instant.now().minus(1, ChronoUnit.DAYS).toEpochMilli();
     Criteria matchingCriteria = Criteria.where("bracelet").is(bracelet)
-        .and("create_on").gt(new Date(_30minAgo));
+        .and("create_on").gt(new Date(_24HoursAgo));
     MatchOperation matchBracelet = new MatchOperation(matchingCriteria);
     return template.aggregate(Aggregation.newAggregation(matchBracelet, GROUP_BY_AP), DB_BT, String.class).getMappedResults();
   }
