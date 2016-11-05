@@ -73,6 +73,54 @@ public class RssiMeasure {
 
 
   public static TimedPosition positioning(List<TimedPosition> positions, String bracelet, boolean euclidean) {
+    final List<Vector2D> observes = positions.stream().map(p -> p.getGps().vector()).collect(Collectors.toList());
+
+    MultivariateJacobianFunction distancesToCurrentCenter = point -> {
+      Vector2D center = new Vector2D(point.getEntry(0), point.getEntry(1));
+      RealVector value = new ArrayRealVector(observes.size());
+      RealMatrix jacobian = new Array2DRowRealMatrix(observes.size(), 2);
+      for (int i = 0; i < observes.size(); ++i) {
+        Vector2D o = observes.get(i);
+        double modelI = euclidean ? Vector2D.distance(o, center) : distance(o, center);
+        value.setEntry(i, modelI);
+        jacobian.setEntry(i, 0, (center.getX() - o.getX()) / modelI);
+        jacobian.setEntry(i, 1, (center.getY() - o.getY()) / modelI);
+      }
+      return new Pair<>(value, jacobian);
+    };
+
+    double[] prescribedDistance = euclidean ?
+        positions.stream().mapToDouble(TimedPosition::getRadius).toArray() :
+        positions.stream().mapToDouble(p -> lnglatDistance(p.getRadius())).toArray();
+
+    double distanceSum = positions.stream().mapToDouble(TimedPosition::getRadius).sum();
+    double ratioSum = positions.stream().mapToDouble(p -> distanceSum - p.getRadius()).sum();
+    double[] ratios = positions.stream().mapToDouble(p -> (distanceSum - p.getRadius()) / ratioSum).toArray();
+    TimedPosition start = TimedPosition.mean(positions, ratios);
+
+    LOG.debug("position evaluation starting from {}", start);
+    LOG.debug("targeting {}, ratios: {}", Arrays.toString(prescribedDistance));
+    LeastSquaresProblem problem = new LeastSquaresBuilder()
+        .checkerPair(new SimpleVectorValueChecker(1e-7, 1e-5))
+        .model(distancesToCurrentCenter)
+        .maxEvaluations(100)
+        .maxIterations(50)
+        .target(prescribedDistance)
+        .lazyEvaluation(false)
+        .start(start.getGps().arr())
+        .build();
+    LeastSquaresOptimizer.Optimum optimum = new LevenbergMarquardtOptimizer().optimize(problem);
+    LngLat center = new LngLat(optimum.getPoint().toArray());
+    LOG.debug("{} fitted center: [{}, {}]", bracelet, center.getLng(), center.getLat());
+    LOG.info("{} positioning starting@{}, RMS: {}", bracelet, center, optimum.getRMS());
+    LOG.debug("{} evaluations: {}", bracelet, optimum.getEvaluations());
+    LOG.debug("{} iterations: {}", bracelet, optimum.getIterations());
+    start.setGps(center);
+    return start;
+  }
+
+
+  public static TimedPosition positioningEuc(List<TimedPosition> positions, String bracelet, boolean euclidean) {
 
     double[] pixelScaleAndOrigin = transform2RelativeCoords(positions);
 
@@ -108,8 +156,8 @@ public class RssiMeasure {
     LeastSquaresProblem problem = new LeastSquaresBuilder()
         .checkerPair(new SimpleVectorValueChecker(1e-7, 1e-6))
         .model(distancesToCurrentCenter)
-        .maxEvaluations(200)
-        .maxIterations(200)
+        .maxEvaluations(100)
+        .maxIterations(50)
         .target(prescribedDistance)
         .lazyEvaluation(false)
         .start(start.getGps().arr())
@@ -118,8 +166,8 @@ public class RssiMeasure {
     double[] eval = optimum.getPoint().toArray();
     LOG.debug("{} fitted center: {} (radius: {})", bracelet, Arrays.toString(eval), start.getRadius());
     LngLat center = new LngLat(
-        5*lnglatDistance(pixelScaleAndOrigin[0]/eval[0]) + pixelScaleAndOrigin[1],
-        5*lnglatDistance(pixelScaleAndOrigin[0]/eval[1]) + pixelScaleAndOrigin[2]
+        lnglatDistance(pixelScaleAndOrigin[0]/eval[0]) + pixelScaleAndOrigin[1],
+        lnglatDistance(pixelScaleAndOrigin[0]/eval[1]) + pixelScaleAndOrigin[2]
     );
     start.setRadius(start.getRadius()*pixelScaleAndOrigin[3]/pixelScaleAndOrigin[0]);
     start.setGps(center);
