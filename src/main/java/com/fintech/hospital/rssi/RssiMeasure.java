@@ -25,6 +25,8 @@ import java.util.stream.Stream;
  */
 public class RssiMeasure {
 
+  static final Logger LOG = LoggerFactory.getLogger(RssiMeasure.class);
+
   /**
    * smooth the rssi changes for each beacon with an arma filter
    */
@@ -42,7 +44,6 @@ public class RssiMeasure {
   private static final double DEG_2_RAD = (Math.PI / 180D);
 
   public static TimedPosition positioning(List<TimedPosition> positions, String bracelet, boolean euclidean) {
-    Logger LOG = LoggerFactory.getLogger(RssiMeasure.class);
     final List<Vector2D> observes = positions.stream().map(p -> p.getGps().vector()).collect(Collectors.toList());
 
     MultivariateJacobianFunction distancesToCurrentCenter = point -> {
@@ -108,15 +109,19 @@ public class RssiMeasure {
           y = origin.getY() > v.getY() ? origin.getY() : v.getY();
       return new Vector2D(x, y);
     });
+    LOG.debug("origin coords: {}", originCoord);
 
     Vector2D gcenter = apList.stream().map(p -> p.getGps().vector())
         .reduce(new Vector2D(0, 0), Vector2D::add).scalarMultiply(1.0 / points.size());
+
+    LOG.debug("center coords: {}", originCoord);
 
     double pixelScale = 960 / (2 * distance(gcenter, originCoord));
     points.forEach(p -> p.getGps().set(
         pixelScale * distance(new Vector2D(p.getGps().getLng(), 0), new Vector2D(originCoord.getX(), 0)),
         pixelScale * distance(new Vector2D(0, originCoord.getY()), new Vector2D(0, p.getGps().getLat()))
     ));
+    LOG.debug("pixel scale: {}", pixelScale);
 
     apList.stream().forEach(ap -> ap.setGps(
         pixelScale * distance(new Vector2D(ap.getLongitude(), 0), new Vector2D(originCoord.getX(), 0)),
