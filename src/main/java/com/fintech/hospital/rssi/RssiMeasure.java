@@ -71,8 +71,7 @@ public class RssiMeasure {
     return new double[]{pixelScale, originCoord.getX(), originCoord.getY(), dist};
   }
 
-
-  public static TimedPosition positioning(List<TimedPosition> positions, String bracelet, boolean euclidean) {
+  public static TimedPosition positioning(List<TimedPosition> positions, String bracelet, TimedPosition lastPos, boolean euclidean) {
     final List<Vector2D> observes = positions.stream().map(p -> p.getGps().vector()).collect(Collectors.toList());
 
     MultivariateJacobianFunction distancesToCurrentCenter = point -> {
@@ -96,7 +95,7 @@ public class RssiMeasure {
     double distanceSum = positions.stream().mapToDouble(TimedPosition::getRadius).sum();
     double ratioSum = positions.stream().mapToDouble(p -> distanceSum - p.getRadius()).sum();
     double[] ratios = positions.stream().mapToDouble(p -> (distanceSum - p.getRadius()) / ratioSum).toArray();
-    TimedPosition start = TimedPosition.mean(positions, ratios);
+    TimedPosition start = lastPos;// TimedPosition.mean(positions, ratios);
 
     LOG.debug("position evaluation starting from {}", start);
     LOG.debug("targeting {}, ratios: {}", Arrays.toString(prescribedDistance));

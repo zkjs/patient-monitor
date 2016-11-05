@@ -77,6 +77,16 @@ public class MongoDB {
     );
   }
 
+  public BraceletPosition getBraecletLastPos(String bracelet){
+    Query query = new Query(where("_id").is(bracelet));
+    query.fields().slice("position", -1, 1);
+    return template.findOne(
+        query,
+        BraceletPosition.class,
+        DB_BP
+    );
+  }
+
   public List<Bracelet> braceletList(boolean binded) {
     return template.find(
         new Query(where("status").is(binded ? 1 : 0)),
