@@ -101,6 +101,8 @@ public class RssiMeasure {
 
   public static void transform2RelativeCoords(List<TimedPosition> points, List<AP> apList) {
 
+    LOG.debug("{} aps, {} points", apList.size(), points.size());
+
     Vector2D originCoord = Stream.concat(
         points.stream().map(p -> p.getGps().vector()),
         apList.stream().map(ap -> new Vector2D(ap.getLongitude(), ap.getLatitude()))
@@ -112,9 +114,9 @@ public class RssiMeasure {
     LOG.debug("origin coords: {}", originCoord);
 
     Vector2D gcenter = apList.stream().map(p -> p.getGps().vector())
-        .reduce(new Vector2D(0, 0), Vector2D::add).scalarMultiply(1.0 / points.size());
+        .reduce(new Vector2D(0, 0), Vector2D::add).scalarMultiply(1.0 / apList.size());
 
-    LOG.debug("center coords: {}", originCoord);
+    LOG.debug("center coords: {}", gcenter);
 
     double pixelScale = 960 / (2 * distance(gcenter, originCoord));
     points.forEach(p -> p.getGps().set(

@@ -71,6 +71,11 @@ public class Bracelet {
     this.patientDBGender = patientDBGender;
   }
 
+  @Override
+  public String toString(){
+    return id.toHexString() + ": " + name;
+  }
+
   /**
    * following fields are used in request body
    */
