@@ -58,4 +58,16 @@ public class RssiDistanceModel {
   public double distance(double rssi) {
     return this.getMultiplier() * Math.pow(rssi / this.getReference(), this.getPower()) + this.getInterceptor();
   }
+
+  public static void main(String[] args) {
+    final RssiDistanceModel RSSI_MODEL = new RssiDistanceModel(0.1820634, 1.9229884, 6.4525179, -75);
+//    final RssiDistanceModel RSSI_MODEL = new RssiDistanceModel(-0.8204588, 2.1541073, 5.6846953, -60);
+    System.out.println(RSSI_MODEL.distance(-91));
+    System.out.println(RSSI_MODEL.distance(-81));
+    System.out.println(RSSI_MODEL.distance(-77));
+    System.out.println(RSSI_MODEL.distance(-54));
+    System.out.println(RSSI_MODEL.distance(-47));
+    System.out.println(RSSI_MODEL.distance(-32));
+  }
+
 }
