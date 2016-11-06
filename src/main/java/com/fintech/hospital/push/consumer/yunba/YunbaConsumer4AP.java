@@ -3,11 +3,13 @@ package com.fintech.hospital.push.consumer.yunba;
 import com.alibaba.fastjson.JSON;
 import com.fintech.hospital.data.Cache;
 import com.fintech.hospital.data.MongoDB;
-import com.fintech.hospital.domain.*;
+import com.fintech.hospital.domain.APMsg;
+import com.fintech.hospital.domain.Bracelet;
+import com.fintech.hospital.domain.BraceletTrace;
+import com.fintech.hospital.domain.TimedPosition;
 import com.fintech.hospital.push.PushService;
 import com.fintech.hospital.push.model.PushMsg;
 import com.fintech.hospital.push.supplier.yunba.YunbaOpts;
-import com.fintech.hospital.rssi.RssiMeasure;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
@@ -106,9 +108,7 @@ public class YunbaConsumer4AP extends YunbaConsumer {
           braceletPosition = mean(positions, new double[]{1 - distRatio0, distRatio0});
           break;
         default:
-          //BraceletPosition pos = mongo.getBraecletLastPos(braceletId);
           braceletPosition = positionFromDistribution(positions, mongo.getAPByNames(mongo.tracedAP(braceletId)));
-              //RssiMeasure.positioning(positions, braceletId, pos==null?null:pos.getPosition().get(0), USE_EUCLIDEAN);
           break;
       }
       mongo.addBraceletPosition(braceletId, braceletPosition);
