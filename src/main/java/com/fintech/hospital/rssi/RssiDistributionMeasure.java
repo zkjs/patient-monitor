@@ -317,20 +317,20 @@ public class RssiDistributionMeasure {
     return new Miniball(arrayPointSet);
   }
 
-  public static void main(String[] args) {
-    RssiDistributionMeasure measure = new RssiDistributionMeasure();
-    double[] origin = measure.genRSSIMatrix(Lists.newArrayList(
-        new double[]{113.943667, 22.529193}, //110
-        new double[]{113.94365, 22.529074}, //119
-        new double[]{113.943704, 22.529133} //112
-    ));
-
-    System.out.println(measure.rssiToDistance(-80));
-    Miniball miniball = measure.multiBeaconMiniball(new double[]{-85, -88, -62});
-    System.out.println(miniball.toString());
-    System.out.println(origin[0] + 1e-5*miniball.center()[0]);
-    System.out.println(origin[1] + 1e-5*miniball.center()[1]);
-  }
+//  public static void main(String[] args) {
+//    RssiDistributionMeasure measure = new RssiDistributionMeasure();
+//    double[] origin = measure.genRSSIMatrix(Lists.newArrayList(
+//        new double[]{113.943667, 22.529193}, //110
+//        new double[]{113.94365, 22.529074}, //119
+//        new double[]{113.943704, 22.529133} //112
+//    ));
+//
+//    System.out.println(measure.rssiToDistance(-80));
+//    Miniball miniball = measure.multiBeaconMiniball(new double[]{-85, -88, -62});
+//    System.out.println(miniball.toString());
+//    System.out.println(origin[0] + 1e-5*miniball.center()[0]);
+//    System.out.println(origin[1] + 1e-5*miniball.center()[1]);
+//  }
 
 
 }
