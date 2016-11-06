@@ -3,10 +3,7 @@ package com.fintech.hospital.push.consumer.yunba;
 import com.alibaba.fastjson.JSON;
 import com.fintech.hospital.data.Cache;
 import com.fintech.hospital.data.MongoDB;
-import com.fintech.hospital.domain.APMsg;
-import com.fintech.hospital.domain.Bracelet;
-import com.fintech.hospital.domain.BraceletTrace;
-import com.fintech.hospital.domain.TimedPosition;
+import com.fintech.hospital.domain.*;
 import com.fintech.hospital.push.PushService;
 import com.fintech.hospital.push.model.PushMsg;
 import com.fintech.hospital.push.supplier.yunba.YunbaOpts;
@@ -108,7 +105,9 @@ public class YunbaConsumer4AP extends YunbaConsumer {
           braceletPosition = mean(positions, new double[]{1 - distRatio0, distRatio0});
           break;
         default:
-          braceletPosition = positionFromDistribution(positions, mongo.getAPByNames(mongo.tracedAP(braceletId)));
+          BraceletPosition lastPos = mongo.getBraecletLastPos(braceletId);
+          braceletPosition = positionFromDistribution(positions, mongo.getAPByNames(mongo.tracedAP(braceletId)),
+              lastPos.getPosition().get(0));
           break;
       }
       mongo.addBraceletPosition(braceletId, braceletPosition);

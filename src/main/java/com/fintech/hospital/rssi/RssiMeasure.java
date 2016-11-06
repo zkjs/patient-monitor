@@ -46,18 +46,20 @@ public class RssiMeasure {
 
   public static TimedPosition positionFromDistribution(
       List<TimedPosition> positions,
-      List<AP> apList
+      List<AP> apList,
+      TimedPosition lastPos
   ){
     RssiDistributionMeasure measure = new RssiDistributionMeasure();
     double[] originCoord = measure.genRSSIMatrix(apList.stream().map(ap->ap.getGps().arr()).collect(Collectors.toList()));
-    Miniball miniball = measure.multiBeaconMiniball(positions.stream().mapToDouble(TimedPosition::getRssi).toArray());
+    Miniball miniball = measure.multiBeaconMiniball(positions.stream().mapToDouble(TimedPosition::getRssi).toArray(),
+        lastPos);
 
     double distanceSum = positions.stream().mapToDouble(TimedPosition::getRadius).sum();
     double ratioSum = positions.stream().mapToDouble(p -> distanceSum - p.getRadius()).sum();
     double[] ratios = positions.stream().mapToDouble(p -> (distanceSum - p.getRadius()) / ratioSum).toArray();
     TimedPosition start = TimedPosition.mean(positions, ratios);
-    start.setRadius(miniball.radius()*1e-6);
-    start.getGps().set(originCoord[0]+miniball.center()[0], originCoord[1]+miniball.center()[1]);
+    start.setRadius(miniball.radius()*5e-7);
+    start.getGps().set(originCoord[0]+miniball.center()[0]*5e-7, originCoord[1]+miniball.center()[1]*5e-7);
     return start;
   }
 

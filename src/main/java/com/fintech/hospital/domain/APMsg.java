@@ -90,14 +90,16 @@ public class APMsg {
   }
 
   public void setPayload(String payload) {
-    if (payload == null || payload.length() != 12)
+    if (payload == null)
       throw new IllegalArgumentException("payload format err");
     this.payload = payload;
-    this.pkg = new byte[4];
-    pkg[0] = Byte.valueOf(payload.substring(2, 4));
-    this.bandId = payload.substring(4, 6);
-    for (int i = 3, j = 1; i < 6; i++) {
-      pkg[j++] = Byte.valueOf(payload.substring(i * 2, (i + 1) * 2));
+    if(payload.length()!=52) {
+      this.pkg = new byte[4];
+      pkg[0] = Byte.valueOf(payload.substring(2, 4));
+      this.bandId = payload.substring(4, 6);
+      for (int i = 3, j = 1; i < 6; i++) {
+        pkg[j++] = Byte.valueOf(payload.substring(i * 2, (i + 1) * 2));
+      }
     }
   }
 
@@ -118,7 +120,7 @@ public class APMsg {
   }
 
   public boolean urgent() {
-    return pkg[0] == 66;
+    return pkg[0] == 66 || (payload.length()==52 && payload.substring(20,22).equalsIgnoreCase("A0"));
   }
 
 }
