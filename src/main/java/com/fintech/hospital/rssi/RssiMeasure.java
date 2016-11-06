@@ -53,7 +53,7 @@ public class RssiMeasure {
         Lists.newArrayList(
           start, positions.stream().max(Comparator.comparingDouble(TimedPosition::getRssi)).get()
         ),
-        new double[]{0.6, 0.4}
+        new double[]{0.4, 0.6}
     );
     return start;
   }
