@@ -46,7 +46,7 @@ public class RssiMeasure {
     double ratioSum = positions.stream().mapToDouble(p -> distanceSum - p.getRadius()).sum();
     double[] ratios = positions.stream().mapToDouble(p -> (distanceSum - p.getRadius()) / ratioSum).toArray();
     TimedPosition start = TimedPosition.mean(positions, ratios);
-    start.setRadius(miniball.radius()*1e-6);
+    start.setRadius(miniball.radius());
     start.getGps().set(originCoord[0]+miniball.center()[0]*1e-6, originCoord[1]+miniball.center()[1]*1e-6);
     if(lastPos!=null) start = TimedPosition.mean(Lists.newArrayList(start, lastPos), null);
     return start;
