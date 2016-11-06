@@ -48,6 +48,12 @@ public class YunbaConsumer4APIOS extends YunbaConsumer {
     }
   }
 
+  @Override
+  public void onConnAck(Object json) throws Exception {
+    LOG.info("yunba for ap {} connected {}", current, json);
+    subscribe(RESCUE_TOPIC);
+  }
+
 
 
 }
