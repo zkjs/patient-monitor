@@ -46,8 +46,8 @@ public class RssiDistributionMeasure {
               y = origin[1] > v[1] ? v[1] : origin[1];
           return new double[]{x,y};
     });
-    originCoord[0] -= 2e-5;
-    originCoord[1] -= 2e-5;
+    originCoord[0] -= 2e-4;
+    originCoord[1] -= 2e-4;
 
     //define a map of 30*30
     Object[][] rssiMatrix = new Object[row][column];
@@ -61,7 +61,7 @@ public class RssiDistributionMeasure {
           /* distance in meters, every meter away */
           double distance = RssiMeasure.distance(
               new Vector2D(beaconLocations.get(0)),
-              new Vector2D(originCoord[0] + i * 1e-6, originCoord[1] + j * 1e-6));
+              new Vector2D(originCoord[0] + i * 1e-5, originCoord[1] + j * 1e-5));
           rssiMatrix[idx][jdx] = rssiFromDistance(distance);
           sigs = getSigs(new double[]{(Double) rssiMatrix[idx][jdx]});
         } else {
@@ -70,7 +70,7 @@ public class RssiDistributionMeasure {
             distances[di] =
                 RssiMeasure.distance(
                     new Vector2D(beaconLocations.get(di)),
-                    new Vector2D(originCoord[0] + i * 1e-6, originCoord[1] + j * 1e-6)
+                    new Vector2D(originCoord[0] + i * 1e-5, originCoord[1] + j * 1e-5)
                 );
           }
           //for each area in the map, get a rssi matrix and a distance matrix
@@ -325,10 +325,11 @@ public class RssiDistributionMeasure {
 //        new double[]{113.943704, 22.529133} //112
 //    ));
 //
-//    Miniball miniball = measure.multiBeaconMiniball(new double[]{-94, -74, -89});
+//    System.out.println(measure.rssiToDistance(-80));
+//    Miniball miniball = measure.multiBeaconMiniball(new double[]{-80, -95, -28});
 //    System.out.println(miniball.toString());
-//    System.out.println(origin[0] + 1e-6*miniball.center()[0]);
-//    System.out.println(origin[1] + 1e-6*miniball.center()[1]);
+//    System.out.println(origin[0] + 1e-5*miniball.center()[0]);
+//    System.out.println(origin[1] + 1e-5*miniball.center()[1]);
 //  }
 
 
