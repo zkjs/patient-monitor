@@ -19,10 +19,10 @@ public class YunbaConsumer4Mon extends YunbaConsumer {
     super(yunbaServerUrl, yunbaAppKey);
   }
 
+
   @Override
   public void consume(String msg) {
     LOG.debug("consuming mon msg... {}", msg);
-
   }
 
 }

@@ -17,8 +17,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -45,8 +47,14 @@ public class RssiMeasure {
     double ratioSum = positions.stream().mapToDouble(p -> distanceSum - p.getRadius()).sum();
     double[] ratios = positions.stream().mapToDouble(p -> (distanceSum - p.getRadius()) / ratioSum).toArray();
     TimedPosition start = TimedPosition.mean(positions, ratios);
-    start.setRadius(miniball.radius());
-    start.getGps().set(originCoord[0]+miniball.center()[0]*1e-5, originCoord[1]+miniball.center()[1]*1e-5);
+    start.setRadius(miniball.radius()*2);
+    start.getGps().set(originCoord[0]+miniball.center()[0]*5e-6, originCoord[1]+miniball.center()[1]*5e-6);
+    start = TimedPosition.mean(
+        Lists.newArrayList(
+          start, positions.stream().max(Comparator.comparingDouble(TimedPosition::getRssi)).get()
+        ),
+        new double[]{0.6, 0.4}
+    );
     return start;
   }
 

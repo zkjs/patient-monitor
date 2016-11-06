@@ -27,12 +27,16 @@ public class RssiDistributionMeasure {
   Object[] matrixes;
 
   public RssiDistributionMeasure() {
-    m = 1.9229884;
-    p = 6.4525179;
-    c = 0.1820634;
-    T = -75;
-    row = 60;
-    column = 60;
+    c = -0.7801144;
+    m = 2.3889582;
+    p = 3.6463172;
+    T = -62;
+//    m = 1.9229884;
+//    p = 6.4525179;
+//    c = 0.1820634;
+//    T = -75;
+    row = 90;
+    column = 90;
   }
 
   void distances(double[] target, double[]... pos) {
@@ -46,8 +50,8 @@ public class RssiDistributionMeasure {
               y = origin[1] > v[1] ? v[1] : origin[1];
           return new double[]{x,y};
     });
-    originCoord[0] -= 2e-4;
-    originCoord[1] -= 2e-4;
+    originCoord[0] -= 1.5*1e-4;
+    originCoord[1] -= 1.5*1e-4;
 
     //define a map of 30*30
     Object[][] rssiMatrix = new Object[row][column];
@@ -61,7 +65,7 @@ public class RssiDistributionMeasure {
           /* distance in meters, every meter away */
           double distance = RssiMeasure.distance(
               new Vector2D(beaconLocations.get(0)),
-              new Vector2D(originCoord[0] + i * 1e-5, originCoord[1] + j * 1e-5));
+              new Vector2D(originCoord[0] + i * 5e-6, originCoord[1] + j * 5e-6));
           rssiMatrix[idx][jdx] = rssiFromDistance(distance);
           sigs = getSigs(new double[]{(Double) rssiMatrix[idx][jdx]});
         } else {
@@ -70,7 +74,7 @@ public class RssiDistributionMeasure {
             distances[di] =
                 RssiMeasure.distance(
                     new Vector2D(beaconLocations.get(di)),
-                    new Vector2D(originCoord[0] + i * 1e-5, originCoord[1] + j * 1e-5)
+                    new Vector2D(originCoord[0] + i * 5e-6, originCoord[1] + j * 5e-6)
                 );
           }
           //for each area in the map, get a rssi matrix and a distance matrix
@@ -104,11 +108,11 @@ public class RssiDistributionMeasure {
     });
     Map<String, List<Map.Entry<String, Double>>> mostSimilarKeys =
         sigKeySims.entrySet().stream().sorted((k1, k2) -> (-1) * Double.compare(k1.getValue(), k2.getValue()))
-            .filter(k -> k.getValue() > 0.6)
+            .filter(k -> k.getValue() > 0.7)
             .collect(Collectors.groupingBy(k -> {
-              int vector = (int) (k.getValue() * 10);
-              if (vector >= 9) return "HIGH";
-              if (vector >= 7 && vector < 9) return "MEDIUM";
+              double vector = k.getValue() * 10;
+              if (vector >= 9.5) return "HIGH";
+              if (vector >= 8 && vector < 9.5) return "MEDIUM";
               return "LOW";
             }));
     List<String> tmpKeys = new ArrayList<>(40);
@@ -311,7 +315,7 @@ public class RssiDistributionMeasure {
       List<double[]> exactAreas = sortedAreas.stream().filter(area -> cosineSim(rssi, (double[]) rssiMatrix[(int) area[0]][(int) area[1]]) > .9)
           .collect(Collectors.toList());
       if (exactAreas.size() > 0) areas = exactAreas;
-      else areas = sortedAreas.subList(0, sortedAreas.size() > 8 ? 8 : sortedAreas.size());
+      else areas = sortedAreas.subList(0, sortedAreas.size() > 4 ? 4 : sortedAreas.size());
     }
     ArrayPointSet arrayPointSet = pointSetFromAreas(areas);
     return new Miniball(arrayPointSet);
@@ -325,11 +329,11 @@ public class RssiDistributionMeasure {
 //        new double[]{113.943704, 22.529133} //112
 //    ));
 //
-//    System.out.println(measure.rssiToDistance(-80));
-//    Miniball miniball = measure.multiBeaconMiniball(new double[]{-85, -88, -62});
+//    System.out.println(measure.rssiToDistance(-87));
+//    Miniball miniball = measure.multiBeaconMiniball(new double[]{-71, -42, -85});
 //    System.out.println(miniball.toString());
-//    System.out.println(origin[0] + 1e-5*miniball.center()[0]);
-//    System.out.println(origin[1] + 1e-5*miniball.center()[1]);
+//    System.out.println(origin[0] + 5e-6*miniball.center()[0]);
+//    System.out.println(origin[1] + 5e-6*miniball.center()[1]);
 //  }
 
 
