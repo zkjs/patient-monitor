@@ -35,8 +35,7 @@ public class RssiMeasure {
 
   public static TimedPosition positionFromDistribution(
       List<TimedPosition> positions,
-      List<AP> apList,
-      TimedPosition lastPos
+      List<AP> apList
   ){
     RssiDistributionMeasure measure = new RssiDistributionMeasure();
     double[] originCoord = measure.genRSSIMatrix(apList.stream().map(ap->ap.getGps().arr()).collect(Collectors.toList()));
@@ -48,7 +47,6 @@ public class RssiMeasure {
     TimedPosition start = TimedPosition.mean(positions, ratios);
     start.setRadius(miniball.radius());
     start.getGps().set(originCoord[0]+miniball.center()[0]*1e-6, originCoord[1]+miniball.center()[1]*1e-6);
-    if(lastPos!=null) start = TimedPosition.mean(Lists.newArrayList(start, lastPos), null);
     return start;
   }
 

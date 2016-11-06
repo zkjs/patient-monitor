@@ -31,8 +31,8 @@ public class RssiDistributionMeasure {
     p = 6.4525179;
     c = 0.1820634;
     T = -75;
-    row = 80;
-    column = 80;
+    row = 60;
+    column = 60;
   }
 
   void distances(double[] target, double[]... pos) {
@@ -311,25 +311,25 @@ public class RssiDistributionMeasure {
       List<double[]> exactAreas = sortedAreas.stream().filter(area -> cosineSim(rssi, (double[]) rssiMatrix[(int) area[0]][(int) area[1]]) > .9)
           .collect(Collectors.toList());
       if (exactAreas.size() > 0) areas = exactAreas;
-      else areas = sortedAreas.subList(0, sortedAreas.size() > 5 ? 5 : sortedAreas.size());
+      else areas = sortedAreas.subList(0, sortedAreas.size() > 8 ? 8 : sortedAreas.size());
     }
     ArrayPointSet arrayPointSet = pointSetFromAreas(areas);
     return new Miniball(arrayPointSet);
   }
 
-//  public static void main(String[] args) {
-//    RssiDistributionMeasure measure = new RssiDistributionMeasure();
-//    double[] origin = measure.genRSSIMatrix(Lists.newArrayList(
-//        new double[]{113.943667, 22.529193}, //110
-//        new double[]{113.94365, 22.529074}, //119
-//        new double[]{113.943704, 22.529133} //112
-//    ));
-//
-//    Miniball miniball = measure.multiBeaconMiniball(new double[]{-84, -73, -97}, null);
-//    System.out.println(miniball.toString());
-//    System.out.println(origin[0] + 1e-6*miniball.center()[0]);
-//    System.out.println(origin[1] + 1e-6*miniball.center()[1]);
-//  }
+  public static void main(String[] args) {
+    RssiDistributionMeasure measure = new RssiDistributionMeasure();
+    double[] origin = measure.genRSSIMatrix(Lists.newArrayList(
+        new double[]{113.943667, 22.529193}, //110
+        new double[]{113.94365, 22.529074}, //119
+        new double[]{113.943704, 22.529133} //112
+    ));
+
+    Miniball miniball = measure.multiBeaconMiniball(new double[]{-94, -74, -89});
+    System.out.println(miniball.toString());
+    System.out.println(origin[0] + 1e-6*miniball.center()[0]);
+    System.out.println(origin[1] + 1e-6*miniball.center()[1]);
+  }
 
 
 }

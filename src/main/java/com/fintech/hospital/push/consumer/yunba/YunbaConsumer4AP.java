@@ -7,6 +7,7 @@ import com.fintech.hospital.domain.*;
 import com.fintech.hospital.push.PushService;
 import com.fintech.hospital.push.model.PushMsg;
 import com.fintech.hospital.push.supplier.yunba.YunbaOpts;
+import com.google.common.collect.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
@@ -94,6 +95,7 @@ public class YunbaConsumer4AP extends YunbaConsumer {
       if (positions == null || positions.isEmpty()) return;
       LOG.info("positioning bracelet {}", bracelet);
       TimedPosition braceletPosition = null;
+      BraceletPosition lastPos = mongo.getBraecletLastPos(braceletId);
       switch (positions.size()) {
         case 1:
           braceletPosition = positions.get(0);
@@ -105,11 +107,11 @@ public class YunbaConsumer4AP extends YunbaConsumer {
           braceletPosition = mean(positions, new double[]{1 - distRatio0, distRatio0});
           break;
         default:
-          BraceletPosition lastPos = mongo.getBraecletLastPos(braceletId);
-          braceletPosition = positionFromDistribution(positions, mongo.getAPByNames(mongo.tracedAP(braceletId)),
-              lastPos==null?null:lastPos.getPosition().get(0));
+          braceletPosition = positionFromDistribution(positions, mongo.getAPByNames(mongo.tracedAP(braceletId)));
           break;
       }
+      if(lastPos!=null) braceletPosition =
+          TimedPosition.mean(Lists.newArrayList(braceletPosition, lastPos.getPosition().get(0)), new double[]{0.7, 0.3});
       mongo.addBraceletPosition(braceletId, braceletPosition);
       LOG.info("new position {} for bracelet {} ", braceletPosition, bracelet);
     }).exceptionally(t -> {
