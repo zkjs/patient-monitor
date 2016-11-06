@@ -27,6 +27,7 @@ public class BraceletTrackRest {
 
   @GetMapping("{bid}")
   public Object tracks(@PathVariable("bid") String bracelet) {
+    if(bracelet==null||bracelet.length()<23) bracelet = "581b1a6542aa101eebc77e61";
     BraceletPosition position = mongo.getBraceletTrack(bracelet);
     if (position == null) return "{'status': 'err', 'error': 'bracelet not found'}";
     return ImmutableMap.of(
@@ -53,6 +54,7 @@ public class BraceletTrackRest {
 
   @GetMapping("rel/{bid}")
   public Object tracksRelativeCoords(@PathVariable("bid") String bracelet) {
+    if(bracelet==null||bracelet.length()<23) bracelet = "581b1a6542aa101eebc77e61";
     BraceletPosition position = mongo.getBraceletTrack(bracelet);
     if (position == null) return "{'status': 'err', 'error': 'bracelet not found'}";
     List<String> aps = mongo.tracedAP(bracelet);
