@@ -4,6 +4,7 @@ import com.dreizak.miniball.highdim.Miniball;
 import com.fintech.hospital.domain.AP;
 import com.fintech.hospital.domain.LngLat;
 import com.fintech.hospital.domain.TimedPosition;
+import com.google.common.collect.Lists;
 import org.apache.commons.math3.fitting.leastsquares.*;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
@@ -28,18 +29,6 @@ public class RssiMeasure {
 
   static final Logger LOG = LoggerFactory.getLogger(RssiMeasure.class);
 
-  /**
-   * smooth the rssi changes for each beacon with an arma filter
-   */
-  private void addMeasurement(Map<String, Double> measures, String unique, int rssi) {
-    /* use first measurement as initialization */
-    if (!measures.containsKey(unique)) {
-      measures.put(unique, 1.00 * rssi);
-    }
-    double previousMeasure = measures.get(unique);
-    measures.put(unique, previousMeasure - 0.8 * (previousMeasure - rssi));
-  }
-
   private static final long E_QUATORIAL_EARTH_RADIUS = 6378137;
 
   private static final double DEG_2_RAD = (Math.PI / 180D);
@@ -51,15 +40,15 @@ public class RssiMeasure {
   ){
     RssiDistributionMeasure measure = new RssiDistributionMeasure();
     double[] originCoord = measure.genRSSIMatrix(apList.stream().map(ap->ap.getGps().arr()).collect(Collectors.toList()));
-    Miniball miniball = measure.multiBeaconMiniball(positions.stream().mapToDouble(TimedPosition::getRssi).toArray(),
-        lastPos);
+    Miniball miniball = measure.multiBeaconMiniball(positions.stream().mapToDouble(TimedPosition::getRssi).toArray());
 
     double distanceSum = positions.stream().mapToDouble(TimedPosition::getRadius).sum();
     double ratioSum = positions.stream().mapToDouble(p -> distanceSum - p.getRadius()).sum();
     double[] ratios = positions.stream().mapToDouble(p -> (distanceSum - p.getRadius()) / ratioSum).toArray();
     TimedPosition start = TimedPosition.mean(positions, ratios);
-    start.setRadius(miniball.radius()*5e-7);
-    start.getGps().set(originCoord[0]+miniball.center()[0]*5e-7, originCoord[1]+miniball.center()[1]*5e-7);
+    start.setRadius(miniball.radius()*1e-6);
+    start.getGps().set(originCoord[0]+miniball.center()[0]*1e-6, originCoord[1]+miniball.center()[1]*1e-6);
+    if(lastPos!=null) start = TimedPosition.mean(Lists.newArrayList(start, lastPos), null);
     return start;
   }
 

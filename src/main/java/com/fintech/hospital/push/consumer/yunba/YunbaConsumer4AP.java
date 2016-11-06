@@ -107,7 +107,7 @@ public class YunbaConsumer4AP extends YunbaConsumer {
         default:
           BraceletPosition lastPos = mongo.getBraecletLastPos(braceletId);
           braceletPosition = positionFromDistribution(positions, mongo.getAPByNames(mongo.tracedAP(braceletId)),
-              lastPos.getPosition().get(0));
+              lastPos==null?null:lastPos.getPosition().get(0));
           break;
       }
       mongo.addBraceletPosition(braceletId, braceletPosition);

@@ -31,8 +31,8 @@ public class RssiDistributionMeasure {
     p = 6.4525179;
     c = 0.1820634;
     T = -75;
-    row = 60;
-    column = 60;
+    row = 80;
+    column = 80;
   }
 
   void distances(double[] target, double[]... pos) {
@@ -46,22 +46,22 @@ public class RssiDistributionMeasure {
               y = origin[1] > v[1] ? v[1] : origin[1];
           return new double[]{x,y};
     });
-    originCoord[0] -= 1e-6;
-    originCoord[1] -= 1e-6;
+    originCoord[0] -= 2e-5;
+    originCoord[1] -= 2e-5;
 
     //define a map of 30*30
     Object[][] rssiMatrix = new Object[row][column];
     Map<String, List<double[]>> signalMap = new HashMap<>();
-    for (int i = -row/2; i < row/2; i++) {
-      for (int j = -column/2; j < column/2; j++) {
+    for (int i = 0; i < row; i++) {
+      for (int j = 0; j < column; j++) {
         //slice the area to 1e-5*1e-5: 1 square meter
-        int idx = i+row/2, jdx = j+column/2;
+        int idx = i, jdx = j;
         double[] sigs;
         if (beaconLocations.size() == 1) {
           /* distance in meters, every meter away */
           double distance = RssiMeasure.distance(
               new Vector2D(beaconLocations.get(0)),
-              new Vector2D(originCoord[0] + i * 5e-7, originCoord[1] + j * 5e-7));
+              new Vector2D(originCoord[0] + i * 1e-6, originCoord[1] + j * 1e-6));
           rssiMatrix[idx][jdx] = rssiFromDistance(distance);
           sigs = getSigs(new double[]{(Double) rssiMatrix[idx][jdx]});
         } else {
@@ -70,7 +70,7 @@ public class RssiDistributionMeasure {
             distances[di] =
                 RssiMeasure.distance(
                     new Vector2D(beaconLocations.get(di)),
-                    new Vector2D(originCoord[0] + i * 5e-7, originCoord[1] + j * 5e-7)
+                    new Vector2D(originCoord[0] + i * 1e-6, originCoord[1] + j * 1e-6)
                 );
           }
           //for each area in the map, get a rssi matrix and a distance matrix
@@ -178,7 +178,7 @@ public class RssiDistributionMeasure {
   double[] rssisFromDistances(double[] distances) {
     double[] rssis = new double[distances.length];
     for (int i = 0; i < rssis.length; i++) {
-      if (distances[i] > 10) {
+      if (distances[i] > 21) {
         rssis[i] = 0;
         continue;
       }
@@ -287,8 +287,7 @@ public class RssiDistributionMeasure {
     return new Miniball(arrayPointSet);
   }
 
-  public Miniball multiBeaconMiniball(double[] rssi, TimedPosition lastPos){
-    //TODO select the one closer to lastPos
+  public Miniball multiBeaconMiniball(double[] rssi){
     Object[][] rssiMatrix = (Object[][]) matrixes[0];
     Map<String, List<double[]>> signalMap = (Map<String, List<double[]>>) matrixes[1];
     //now we have a signal vector
@@ -328,8 +327,8 @@ public class RssiDistributionMeasure {
 //
 //    Miniball miniball = measure.multiBeaconMiniball(new double[]{-84, -73, -97}, null);
 //    System.out.println(miniball.toString());
-//    System.out.println(origin[0] + 5e-7*miniball.center()[0]);
-//    System.out.println(origin[1] + 5e-7*miniball.center()[1]);
+//    System.out.println(origin[0] + 1e-6*miniball.center()[0]);
+//    System.out.println(origin[1] + 1e-6*miniball.center()[1]);
 //  }
 
 
