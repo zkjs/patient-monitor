@@ -17,6 +17,7 @@ import java.util.List;
 
 import static com.fintech.hospital.domain.TimedPosition.mean;
 import static com.fintech.hospital.push.model.PushType.BROADCAST;
+import static com.fintech.hospital.rssi.RssiMeasure.positionFromDistribution;
 import static java.util.concurrent.CompletableFuture.runAsync;
 import static java.util.concurrent.CompletableFuture.supplyAsync;
 import static org.springframework.beans.factory.config.BeanDefinition.SCOPE_SINGLETON;
@@ -105,8 +106,9 @@ public class YunbaConsumer4AP extends YunbaConsumer {
           braceletPosition = mean(positions, new double[]{1 - distRatio0, distRatio0});
           break;
         default:
-          BraceletPosition pos = mongo.getBraecletLastPos(braceletId);
-          braceletPosition = RssiMeasure.positioning(positions, braceletId, pos==null?null:pos.getPosition().get(0), USE_EUCLIDEAN);
+          //BraceletPosition pos = mongo.getBraecletLastPos(braceletId);
+          braceletPosition = positionFromDistribution(positions, mongo.getAPByNames(mongo.tracedAP(braceletId)));
+              //RssiMeasure.positioning(positions, braceletId, pos==null?null:pos.getPosition().get(0), USE_EUCLIDEAN);
           break;
       }
       mongo.addBraceletPosition(braceletId, braceletPosition);

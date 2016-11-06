@@ -1,5 +1,6 @@
 package com.fintech.hospital.rssi;
 
+import com.dreizak.miniball.highdim.Miniball;
 import com.fintech.hospital.domain.AP;
 import com.fintech.hospital.domain.LngLat;
 import com.fintech.hospital.domain.TimedPosition;
@@ -42,6 +43,24 @@ public class RssiMeasure {
   private static final long E_QUATORIAL_EARTH_RADIUS = 6378137;
 
   private static final double DEG_2_RAD = (Math.PI / 180D);
+
+  public static TimedPosition positionFromDistribution(
+      List<TimedPosition> positions,
+      List<AP> apList
+  ){
+    RssiDistributionMeasure measure = new RssiDistributionMeasure();
+    double[] originCoord = measure.genRSSIMatrix(apList.stream().map(ap->ap.getGps().arr()).collect(Collectors.toList()));
+    Miniball miniball = measure.multiBeaconMiniball(positions.stream().mapToDouble(TimedPosition::getRssi).toArray());
+
+    double distanceSum = positions.stream().mapToDouble(TimedPosition::getRadius).sum();
+    double ratioSum = positions.stream().mapToDouble(p -> distanceSum - p.getRadius()).sum();
+    double[] ratios = positions.stream().mapToDouble(p -> (distanceSum - p.getRadius()) / ratioSum).toArray();
+    TimedPosition start = TimedPosition.mean(positions, ratios);
+    start.setRadius(miniball.radius()*1e-6);
+    start.getGps().set(originCoord[0]+miniball.center()[0], originCoord[1]+miniball.center()[1]);
+    return start;
+  }
+
 
   public static double[] transform2RelativeCoords(List<TimedPosition> points) {
 
@@ -177,7 +196,7 @@ public class RssiMeasure {
     return start;
   }
 
-  private static double distance(Vector2D o, Vector2D center) {
+  static double distance(Vector2D o, Vector2D center) {
     double dlong = (o.getX() - center.getX()) * DEG_2_RAD;
     double dlat = (o.getY() - center.getY()) * DEG_2_RAD;
     double a = Math.pow(Math.sin(dlat / 2D), 2D)

@@ -90,6 +90,12 @@
       <version>${commons.math.ver}</version>
     </dependency>
 
+    <dependency>
+      <groupId>com.dreizak</groupId>
+      <artifactId>miniball</artifactId>
+      <version>1.0.4-SNAPSHOT</version>
+    </dependency>
+
     <!-- http utils -->
     <dependency>
       <groupId>org.apache.httpcomponents</groupId>
