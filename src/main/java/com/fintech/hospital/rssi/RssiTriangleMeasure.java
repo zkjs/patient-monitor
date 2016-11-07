@@ -1,6 +1,5 @@
 package com.fintech.hospital.rssi;
 
-import com.google.common.collect.Lists;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 import org.slf4j.Logger;
@@ -176,27 +175,27 @@ public class RssiTriangleMeasure {
   }
 
 
-  public static void main(String[] args) {
-    double c = -0.7801144,
-    m = 2.3889582,
-    p = 3.6463172,
-    T = -62;
-    RssiDistanceModel model = new RssiDistanceModel(c, m, p, T);
-    RssiTriangleMeasure measure = new RssiTriangleMeasure(Lists.newArrayList(
-        new Vector2D(113.943667, 22.529193),//110
-        new Vector2D(113.94365, 22.529074), //119
-        new Vector2D(113.943704, 22.529133) //112
-      ),
-      Lists.newArrayList(
-          model.distance(-40), //110
-          model.distance(-92), //119
-          model.distance(-86) //112
-      ),
-      1,
-      false
-    );
-    System.out.println(measure.positioning());
-    System.out.println(measure.getRadius());
-  }
+//  public static void main(String[] args) {
+//    double c = -0.7801144,
+//    m = 2.3889582,
+//    p = 3.6463172,
+//    T = -62;
+//    RssiDistanceModel model = new RssiDistanceModel(c, m, p, T);
+//    RssiTriangleMeasure measure = new RssiTriangleMeasure(Lists.newArrayList(
+//        new Vector2D(113.943667, 22.529193),//110
+//        new Vector2D(113.94365, 22.529074), //119
+//        new Vector2D(113.943704, 22.529133) //112
+//      ),
+//      Lists.newArrayList(
+//          model.distance(-40), //110
+//          model.distance(-92), //119
+//          model.distance(-86) //112
+//      ),
+//      1,
+//      false
+//    );
+//    System.out.println(measure.positioning());
+//    System.out.println(measure.getRadius());
+//  }
 
 }
