@@ -162,7 +162,7 @@ public class RssiTriangleMeasure {
   }
 
   public double getRadius() {
-    if (current == null) throw new IllegalStateException("run positioning first!");
+    if (previous == null) throw new IllegalStateException("run positioning first!");
     return this.radius;
   }
 
