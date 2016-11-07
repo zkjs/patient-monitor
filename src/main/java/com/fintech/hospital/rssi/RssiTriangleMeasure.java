@@ -1,5 +1,6 @@
 package com.fintech.hospital.rssi;
 
+import com.google.common.collect.Lists;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 import org.slf4j.Logger;
@@ -119,6 +120,8 @@ public class RssiTriangleMeasure {
     if (Math.abs(currentDiff - previousDiff) > 1.2 * tolerance && currentDeviation > previousDeviation)
       return null;
     else {
+      System.out.println("error: " + Arrays.toString(nextDiffs));
+      System.out.println("next: " + nextPoint);
       return nextPoint;
     }
   }
@@ -130,12 +133,12 @@ public class RssiTriangleMeasure {
   private Vector2D decrGradient(Vector2D point, Vector2D target, double diff) {
     if (point.getX() == target.getX()) {
       double closer = Math.signum(point.getY() - target.getY());
-      return new Vector2D(point.getX(), target.getY() + (diff > 0 ? closer : -1 * closer) * (euclidean ? tolerance : 7e-6 * tolerance));
+      return new Vector2D(point.getX(), target.getY() + (diff > 0 ? closer : -1 * closer) * (euclidean ? tolerance : (1.0+Math.random())*Math.PI*1e-6 * tolerance));
     } else {
       double ax = (point.getY() - target.getY()) / (point.getX() - target.getX()),
           c = (point.getX() * target.getY() - target.getX() * point.getY()) / (point.getX() - target.getX()),
           closer = Math.signum(point.getX() - target.getX()),
-          x = target.getX() + (diff > 0 ? closer : -1 * closer) * (euclidean ? tolerance : 7e-6 * tolerance);
+          x = target.getX() + (diff > 0 ? closer : -1 * closer) * (euclidean ? tolerance : (1.0+Math.random())*Math.PI*1e-6 * tolerance);
       return new Vector2D(x, ax * x + c);
     }
   }
@@ -179,14 +182,15 @@ public class RssiTriangleMeasure {
 //        new Vector2D(113.943704, 22.529133) //112
 //      ),
 //      Lists.newArrayList(
-//          model.distance(-86), //110
-//          model.distance(-77), //119
-//          model.distance(-56) //112
+//          model.distance(-40), //110
+//          model.distance(-92), //119
+//          model.distance(-86) //112
 //      ),
 //      1,
 //      false
 //    );
 //    System.out.println(measure.positioning());
+//    System.out.println(measure.getRadius());
 //  }
 
 }
