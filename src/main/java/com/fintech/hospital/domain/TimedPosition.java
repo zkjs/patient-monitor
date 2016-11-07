@@ -20,8 +20,10 @@ public class TimedPosition {
     );
   }
 
+  //final RssiDistanceModel RSSI_MODEL2 = new RssiDistanceModel(-0.7801144,2.3889582, 3.6463172,-62);
   @JSONField(serialize = false)
-  final RssiDistanceModel RSSI_MODEL = new RssiDistanceModel(-0.7801144,2.3889582, 3.6463172,-62) ;
+  final RssiDistanceModel RSSI_MODEL = new RssiDistanceModel(-2.025513, 3.902773, 1.987332, -59);
+
 
   public TimedPosition() {
   }
