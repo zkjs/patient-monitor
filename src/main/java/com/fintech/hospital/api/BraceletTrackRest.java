@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.stream.IntStream;
 
 import static com.fintech.hospital.rssi.RssiMeasure.transform2RelativeCoords;
 
@@ -59,11 +60,21 @@ public class BraceletTrackRest {
     if (position == null) return "{'status': 'err', 'error': 'bracelet not found'}";
     List<String> aps = mongo.tracedAP(bracelet);
     List<AP> apList = mongo.getAPByNames(aps);
+    smooth(position.getPosition());
     transform2RelativeCoords(position.getPosition(), apList);
     return ImmutableMap.of(
         "list", position.getPosition(),
         "aps", apList
     );
+  }
+
+  private void smooth(List<TimedPosition> positions){
+    for(int i=0; i<positions.size(); i+=3){
+      TimedPosition mean = TimedPosition.mean(positions.subList(i, i+3>=positions.size()?positions.size()-1:i+3), null);
+      positions.get(i).setGps(mean.getGps());
+      positions.get(i+1>=positions.size()?positions.size()-1:i+1);
+      positions.get(i+2>=positions.size()?positions.size()-1:i+2);
+    }
   }
 
 
