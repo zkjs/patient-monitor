@@ -34,7 +34,7 @@ public class Cache {
     }
     c.data.put(apid, pos);
 
-    if (c.data.size() > 4 || expired(c.timestamp)) {
+    if (c.data.size() >= 3 || expired(c.timestamp)) {
       c = CACHE.remove(bracelet);
       return new ArrayList<>(c.data.values());
     }
