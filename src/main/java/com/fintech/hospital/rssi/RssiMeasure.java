@@ -41,8 +41,8 @@ public class RssiMeasure {
       List<AP> apList
   ){
     RssiTriangleMeasure measure = new RssiTriangleMeasure(
-        apList.stream().map(ap->ap.getGps().vector()).collect(Collectors.toList()),
-        positions.stream().map(TimedPosition::getRssi).collect(Collectors.toList()),
+        apList.stream().sorted((ap1,ap2)->ap1.getAlias().compareToIgnoreCase(ap2.getAlias())).map(ap->ap.getGps().vector()).collect(Collectors.toList()),
+        positions.stream().sorted((pos1, pos2)->pos1.getAp().compareToIgnoreCase(pos2.getAp())).map(TimedPosition::getRssi).collect(Collectors.toList()),
         1,
         false
     );
