@@ -119,8 +119,8 @@ public class YunbaConsumer4AP extends YunbaConsumer {
           LOG.debug("aps: {}", apList);
           braceletPosition =
               USE_TRIANGLE?
-                  positioning(positions, braceletId, null, USE_EUCLIDEAN) :
-              //positionByTriangleGradient(positions, apList) :
+//                  positioning(positions, braceletId, null, USE_EUCLIDEAN) :
+              positionByTriangleGradient(positions, apList) :
               positionFromDistribution(positions, mongo.getAPByNames(mongo.tracedAP(braceletId)));
           break;
       }
