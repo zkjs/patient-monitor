@@ -50,6 +50,7 @@ public class RssiMeasure {
     TimedPosition start = TimedPosition.mean(positions, null);
     start.getGps().set(evaluation.getX(), evaluation.getY());
     start.setRadius(measure.getRadius());
+    LOG.debug("triangular positioning: {} ({}), {} iterations", evaluation, measure.getRadius(), measure.getIteration());
     return start;
   }
 

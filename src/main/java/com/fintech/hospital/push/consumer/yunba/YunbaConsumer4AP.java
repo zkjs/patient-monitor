@@ -114,7 +114,7 @@ public class YunbaConsumer4AP extends YunbaConsumer {
       if(lastPos!=null) braceletPosition =
           TimedPosition.mean(Lists.newArrayList(braceletPosition, lastPos.getPosition().get(0)), new double[]{0.7, 0.3});
       mongo.addBraceletPosition(braceletId, braceletPosition);
-      LOG.info("new position {} for bracelet {} ", braceletPosition, bracelet);
+      LOG.info("BASED ON {}, GOT NEW POS {} 4-bracelet {} ", positions.size(), braceletPosition, bracelet);
     }).exceptionally(t -> {
       LOG.error("bracelet " + bracelet + " err...: ", t);
       return null;

@@ -1,6 +1,5 @@
 package com.fintech.hospital.rssi;
 
-import com.google.common.collect.Lists;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 import org.slf4j.Logger;
@@ -27,6 +26,7 @@ public class RssiTriangleMeasure {
   private Vector2D current;
   private Vector2D previous;
   private double radius;
+  private long iteration = 0;
   private StandardDeviation standardDeviation = new StandardDeviation();
 
   private Logger LOG = LoggerFactory.getLogger(RssiTriangleMeasure.class);
@@ -133,12 +133,12 @@ public class RssiTriangleMeasure {
   private Vector2D decrGradient(Vector2D point, Vector2D target, double diff) {
     if (point.getX() == target.getX()) {
       double closer = Math.signum(point.getY() - target.getY());
-      return new Vector2D(point.getX(), target.getY() + (diff > 0 ? closer : -1 * closer) * (euclidean ? tolerance : (1.0+Math.random())*Math.PI*1e-6 * tolerance));
+      return new Vector2D(point.getX(), target.getY() + (diff > 0 ? closer : -1 * closer) * (euclidean ? tolerance : (1.0 + Math.random()) * Math.PI * 1e-6 * tolerance));
     } else {
       double ax = (point.getY() - target.getY()) / (point.getX() - target.getX()),
           c = (point.getX() * target.getY() - target.getX() * point.getY()) / (point.getX() - target.getX()),
           closer = Math.signum(point.getX() - target.getX()),
-          x = target.getX() + (diff > 0 ? closer : -1 * closer) * (euclidean ? tolerance : (1.0+Math.random())*Math.PI*1e-6 * tolerance);
+          x = target.getX() + (diff > 0 ? closer : -1 * closer) * (euclidean ? tolerance : (1.0 + Math.random()) * Math.PI * 1e-6 * tolerance);
       return new Vector2D(x, ax * x + c);
     }
   }
@@ -160,6 +160,7 @@ public class RssiTriangleMeasure {
     while (current != null) {
       double[] diffs = diffs(current);
       current = selectNextPoint(diffs);
+      iteration++;
     }
     return previous;
   }
@@ -167,6 +168,10 @@ public class RssiTriangleMeasure {
   public double getRadius() {
     if (previous == null) throw new IllegalStateException("run positioning first!");
     return this.radius;
+  }
+
+  public long getIteration(){
+    return iteration;
   }
 
 

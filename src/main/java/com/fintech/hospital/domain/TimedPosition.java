@@ -110,13 +110,12 @@ public class TimedPosition {
       throw new IllegalArgumentException("pos and ratio size should match: pos="
           + allpos.size() + ", ratios=" + ratios.length);
     }
-    double time = 0.0, lng = 0.0, lat = 0.0, radius = 0.0, maxratio = 0.0;
+    double time = 0.0, lng = 0.0, lat = 0.0, maxratio = 0.0;
     int nearestAPIndex = 0;
     for (int i = 0; i < allpos.size(); i++) {
       time += allpos.get(i).getTimestamp() * ratios[i];
       lng += allpos.get(i).getGps().getLng() * ratios[i];
       lat += allpos.get(i).getGps().getLat() * ratios[i];
-      radius += allpos.get(i).getRadius() * ratios[i];
       if (ratios[i] > maxratio) {
         maxratio = ratios[i];
         nearestAPIndex = i;
@@ -126,7 +125,7 @@ public class TimedPosition {
     nearestAP.setAlias(allpos.get(nearestAPIndex).getAp());
     nearestAP.setFloor(allpos.get(nearestAPIndex).getFloor());
     TimedPosition meaned = new TimedPosition(nearestAP, (long) time);
-    meaned.setRadius(radius);
+    meaned.setRadius(allpos.get(0).getRadius());
     return meaned;
   }
 
