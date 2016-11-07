@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.List;
 
 import static com.fintech.hospital.domain.TimedPosition.mean;
@@ -112,8 +113,11 @@ public class YunbaConsumer4AP extends YunbaConsumer {
           braceletPosition = mean(positions, new double[]{1 - distRatio0, distRatio0});
           break;
         default:
+          List<AP> apList = mongo.getAPByNames(mongo.tracedAP(braceletId));
+          LOG.debug("positions: {}", positions);
+          LOG.debug("aps: {}", apList);
           braceletPosition = USE_TRIANGLE?
-              positionByTriangleGradient(positions, mongo.getAPByNames(mongo.tracedAP(braceletId))) :
+              positionByTriangleGradient(positions, apList) :
               positionFromDistribution(positions, mongo.getAPByNames(mongo.tracedAP(braceletId)));
           break;
       }
