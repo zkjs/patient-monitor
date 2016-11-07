@@ -20,6 +20,7 @@ import static com.fintech.hospital.domain.TimedPosition.mean;
 import static com.fintech.hospital.push.model.PushType.BROADCAST;
 import static com.fintech.hospital.rssi.RssiMeasure.positionByTriangleGradient;
 import static com.fintech.hospital.rssi.RssiMeasure.positionFromDistribution;
+import static com.fintech.hospital.rssi.RssiMeasure.positioning;
 import static java.util.concurrent.CompletableFuture.runAsync;
 import static java.util.concurrent.CompletableFuture.supplyAsync;
 import static org.springframework.beans.factory.config.BeanDefinition.SCOPE_SINGLETON;
@@ -116,8 +117,10 @@ public class YunbaConsumer4AP extends YunbaConsumer {
           List<AP> apList = mongo.getAPByNames(mongo.tracedAP(braceletId));
           LOG.debug("positions: {}", positions);
           LOG.debug("aps: {}", apList);
-          braceletPosition = USE_TRIANGLE?
-              positionByTriangleGradient(positions, apList) :
+          braceletPosition =
+              USE_TRIANGLE?
+                  positioning(positions, braceletId, null, USE_EUCLIDEAN) :
+              //positionByTriangleGradient(positions, apList) :
               positionFromDistribution(positions, mongo.getAPByNames(mongo.tracedAP(braceletId)));
           break;
       }
