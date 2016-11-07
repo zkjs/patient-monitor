@@ -3,8 +3,10 @@ package com.fintech.hospital.api;
 import com.fintech.hospital.data.MongoDB;
 import com.fintech.hospital.domain.AP;
 import com.fintech.hospital.domain.BraceletPosition;
+import com.fintech.hospital.domain.LngLat;
 import com.fintech.hospital.domain.TimedPosition;
 import com.google.common.collect.ImmutableMap;
+import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -70,10 +72,14 @@ public class BraceletTrackRest {
 
   private void smooth(List<TimedPosition> positions){
     for(int i=0; i<positions.size(); i+=3){
-      TimedPosition mean = TimedPosition.mean(positions.subList(i, i+3>=positions.size()?positions.size()-1:i+3), null);
-      positions.get(i).setGps(mean.getGps());
-      positions.get(i+1>=positions.size()?positions.size()-1:i+1);
-      positions.get(i+2>=positions.size()?positions.size()-1:i+2);
+      if(i+3>=positions.size()) break;
+      TimedPosition mean = TimedPosition.mean(positions.subList(i, i+3), null);
+      Vector2D meanV = positions.get(i).getGps().vector().add(mean.getGps().vector()).scalarMultiply(0.5);
+      positions.get(i).setGps(new LngLat(meanV.getX(), meanV.getY()));
+      meanV = positions.get(i+1).getGps().vector().add(mean.getGps().vector()).scalarMultiply(0.5);
+      positions.get(i+1).setGps(new LngLat(meanV.getX(), meanV.getY()));
+      meanV = positions.get(i+2).getGps().vector().add(mean.getGps().vector()).scalarMultiply(0.5);
+      positions.get(i+2).setGps(new LngLat(meanV.getX(), meanV.getY()));
     }
   }
 
