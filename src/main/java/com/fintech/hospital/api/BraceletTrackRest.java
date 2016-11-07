@@ -81,6 +81,24 @@ public class BraceletTrackRest {
       meanV = positions.get(i+2).getGps().vector().add(mean.getGps().vector()).scalarMultiply(0.5);
       positions.get(i+2).setGps(new LngLat(meanV.getX(), meanV.getY()));
     }
+
+    if(positions.size()>15) {
+      for (int i = 0; i < positions.size(); i += 5) {
+        if (i + 5 >= positions.size()) break;
+        TimedPosition mean = TimedPosition.mean(positions.subList(i, i + 5), null);
+        Vector2D meanV = positions.get(i).getGps().vector().add(mean.getGps().vector()).scalarMultiply(0.5);
+        positions.get(i).setGps(new LngLat(meanV.getX(), meanV.getY()));
+        meanV = positions.get(i + 1).getGps().vector().add(mean.getGps().vector()).scalarMultiply(0.5);
+        positions.get(i + 1).setGps(new LngLat(meanV.getX(), meanV.getY()));
+        meanV = positions.get(i + 2).getGps().vector().add(mean.getGps().vector()).scalarMultiply(0.5);
+        positions.get(i + 2).setGps(new LngLat(meanV.getX(), meanV.getY()));
+        meanV = positions.get(i + 3).getGps().vector().add(mean.getGps().vector()).scalarMultiply(0.5);
+        positions.get(i + 3).setGps(new LngLat(meanV.getX(), meanV.getY()));
+        meanV = positions.get(i + 4).getGps().vector().add(mean.getGps().vector()).scalarMultiply(0.5);
+        positions.get(i + 5).setGps(new LngLat(meanV.getX(), meanV.getY()));
+      }
+    }
+
   }
 
 
