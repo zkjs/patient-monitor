@@ -1,5 +1,6 @@
 package com.fintech.hospital.domain;
 
+import com.alibaba.fastjson.annotation.JSONField;
 import com.fintech.hospital.rssi.RssiDistanceModel;
 
 import java.util.Arrays;
@@ -19,7 +20,8 @@ public class TimedPosition {
     );
   }
 
-  final RssiDistanceModel RSSI_MODEL = new RssiDistanceModel(0.1820634, 1.9229884, 6.4525179, -75);
+  @JSONField(serialize = false)
+  final RssiDistanceModel RSSI_MODEL = new RssiDistanceModel(-0.7801144,2.3889582, 3.6463172,-62) ;
 
   public TimedPosition() {
   }
@@ -118,14 +120,16 @@ public class TimedPosition {
       lat += allpos.get(i).getGps().getLat() * ratios[i];
       if (ratios[i] > maxratio) {
         maxratio = ratios[i];
-        nearestAPIndex = i;
       }
+      if(allpos.get(i).getRssi()<allpos.get(nearestAPIndex).getRssi())
+        nearestAPIndex = i;
     }
     nearestAP.setGps(lng, lat);
     nearestAP.setAlias(allpos.get(nearestAPIndex).getAp());
     nearestAP.setFloor(allpos.get(nearestAPIndex).getFloor());
     TimedPosition meaned = new TimedPosition(nearestAP, (long) time);
     meaned.setRadius(allpos.get(0).getRadius());
+    meaned.setRssi(allpos.get(nearestAPIndex).getRssi());
     return meaned;
   }
 
