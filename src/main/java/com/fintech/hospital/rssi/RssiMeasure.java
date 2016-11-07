@@ -35,6 +35,24 @@ public class RssiMeasure {
 
   private static final double DEG_2_RAD = (Math.PI / 180D);
 
+
+  public static TimedPosition positionByTriangleGradient(
+      List<TimedPosition> positions,
+      List<AP> apList
+  ){
+    RssiTriangleMeasure measure = new RssiTriangleMeasure(
+        apList.stream().map(ap->ap.getGps().vector()).collect(Collectors.toList()),
+        positions.stream().map(TimedPosition::getRssi).collect(Collectors.toList()),
+        1,
+        false
+    );
+    Vector2D evaluation = measure.positioning();
+    TimedPosition start = TimedPosition.mean(positions, null);
+    start.getGps().set(evaluation.getX(), evaluation.getY());
+    start.setRadius(measure.getRadius());
+    return start;
+  }
+
   public static TimedPosition positionFromDistribution(
       List<TimedPosition> positions,
       List<AP> apList
