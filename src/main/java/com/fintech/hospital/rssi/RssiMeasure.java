@@ -59,8 +59,8 @@ public class RssiMeasure {
       List<AP> apList
   ){
     RssiDistributionMeasure measure = new RssiDistributionMeasure();
-    double[] originCoord = measure.genRSSIMatrix(apList.stream().map(ap->ap.getGps().arr()).collect(Collectors.toList()));
-    Miniball miniball = measure.multiBeaconMiniball(positions.stream().mapToDouble(TimedPosition::getRssi).toArray());
+    double[] originCoord = measure.genRSSIMatrix(apList.stream().sorted((ap1,ap2)->ap1.getAlias().compareToIgnoreCase(ap2.getAlias())).map(ap->ap.getGps().arr()).collect(Collectors.toList()));
+    Miniball miniball = measure.multiBeaconMiniball(positions.stream().sorted((pos1, pos2)->pos1.getAp().compareToIgnoreCase(pos2.getAp())).mapToDouble(TimedPosition::getRssi).toArray());
 
     double distanceSum = positions.stream().mapToDouble(TimedPosition::getRadius).sum();
     double ratioSum = positions.stream().mapToDouble(p -> distanceSum - p.getRadius()).sum();

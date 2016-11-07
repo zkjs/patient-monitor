@@ -54,6 +54,10 @@ public class YunbaConsumer4AP extends YunbaConsumer {
   @Value("${distance.coords.euclidean}")
   private boolean USE_EUCLIDEAN;
 
+  @Value("${measure.method.triangle}")
+  private boolean USE_TRIANGLE;
+
+
   @Override
   public void consume(String msg) {
     LOG.info("consuming ap msg... {}", msg);
@@ -108,7 +112,9 @@ public class YunbaConsumer4AP extends YunbaConsumer {
           braceletPosition = mean(positions, new double[]{1 - distRatio0, distRatio0});
           break;
         default:
-          braceletPosition = positionByTriangleGradient(positions, mongo.getAPByNames(mongo.tracedAP(braceletId)));
+          braceletPosition = USE_TRIANGLE?
+              positionByTriangleGradient(positions, mongo.getAPByNames(mongo.tracedAP(braceletId))) :
+              positionFromDistribution(positions, mongo.getAPByNames(mongo.tracedAP(braceletId)));
           break;
       }
       if(lastPos!=null) braceletPosition =
