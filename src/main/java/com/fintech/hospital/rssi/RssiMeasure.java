@@ -44,14 +44,14 @@ public class RssiMeasure {
         apList.stream().sorted((ap1,ap2)->ap1.getAlias().compareToIgnoreCase(ap2.getAlias())).map(ap->ap.getGps().vector()).collect(Collectors.toList()),
         positions.stream().sorted((pos1, pos2)->pos1.getAp().compareToIgnoreCase(pos2.getAp()))
             .map(TimedPosition::getRadius).collect(Collectors.toList()),
-        1,
+        0.5,
         false
     );
     Vector2D evaluation = measure.positioning();
     TimedPosition start = TimedPosition.mean(positions, null);
     start.getGps().set(evaluation.getX(), evaluation.getY());
     start.setRadius(measure.getRadius());
-    LOG.debug("triangular positioning: {} ({}), {} iterations", evaluation, measure.getRadius(), measure.getIteration());
+    LOG.info("triangular positioning: {} ({}), {} iterations", evaluation, measure.getRadius(), measure.getIteration());
     return start;
   }
 

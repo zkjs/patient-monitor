@@ -12,6 +12,11 @@ import java.util.Date;
  */
 public class AP {
 
+  @Override
+  public String toString(){
+    return alias;
+  }
+
   @JSONField(serialize = false)
   @Id
   private ObjectId id;

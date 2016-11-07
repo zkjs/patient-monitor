@@ -99,7 +99,7 @@ public class YunbaConsumer4AP extends YunbaConsumer {
     }).thenAccept(positions -> {
       /* cache bandid, lnglatDistance and ap lnglat to list */
       if (positions == null || positions.isEmpty()) return;
-      LOG.info("positioning bracelet {}", bracelet);
+      LOG.debug("positioning bracelet {}", bracelet);
       TimedPosition braceletPosition = null;
       BraceletPosition lastPos = mongo.getBraecletLastPos(braceletId);
       switch (positions.size()) {
