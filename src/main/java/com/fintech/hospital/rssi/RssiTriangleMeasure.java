@@ -1,5 +1,6 @@
 package com.fintech.hospital.rssi;
 
+import com.google.common.collect.Lists;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 import org.slf4j.Logger;
@@ -120,8 +121,8 @@ public class RssiTriangleMeasure {
     if (Math.abs(currentDiff - previousDiff) > 1.2 * tolerance && currentDeviation > previousDeviation)
       return null;
     else {
-      System.out.println("error: " + Arrays.toString(nextDiffs));
-      System.out.println("next: " + nextPoint);
+//      System.out.println("error: " + Arrays.toString(nextDiffs));
+//      System.out.println("next: " + nextPoint);
       return nextPoint;
     }
   }
@@ -182,20 +183,30 @@ public class RssiTriangleMeasure {
 //    T = -62;
 //    RssiDistanceModel model = new RssiDistanceModel(c, m, p, T);
 //    RssiTriangleMeasure measure = new RssiTriangleMeasure(Lists.newArrayList(
-//        new Vector2D(113.943667, 22.529193),//110
-//        new Vector2D(113.94365, 22.529074), //119
-//        new Vector2D(113.943704, 22.529133) //112
+////        new Vector2D(113.943667, 22.529193),//110
+////        new Vector2D(113.94365, 22.529074), //119
+////        new Vector2D(113.943704, 22.529133) //112
+//
+//        new Vector2D(113.943656, 22.52919), //110
+//        new Vector2D(113.943701, 22.52919), //119
+//        new Vector2D(113.943656, 22.529217) //112
 //      ),
 //      Lists.newArrayList(
-//          model.distance(-40), //110
-//          model.distance(-92), //119
-//          model.distance(-86) //112
+//          model.distance(-81), //110
+//          model.distance(-76), //119
+//          model.distance(-78) //112
 //      ),
 //      1,
 //      false
 //    );
-//    System.out.println(measure.positioning());
-//    System.out.println(measure.getRadius());
+//
+//    System.out.println(RssiMeasure.distance(new Vector2D(113.943656, 22.52919), new Vector2D(113.943701, 22.52919)));
+//    System.out.println(RssiMeasure.distance(new Vector2D(113.943656, 22.529217), new Vector2D(113.943701, 22.52919)));
+//    System.out.println(RssiMeasure.distance(new Vector2D(113.943656, 22.529217), new Vector2D(113.943656, 22.52919)));
+//    System.out.println(model.distance(-72));
+//    System.out.println(model.distance(-71));
+////    System.out.println(measure.positioning());
+////    System.out.println(measure.getRadius());
 //  }
 
 }

@@ -39,10 +39,6 @@ public class RssiDistributionMeasure {
     column = 90;
   }
 
-  void distances(double[] target, double[]... pos) {
-    Arrays.asList(pos).forEach(x -> System.out.println(new EuclideanDistance().compute(target, x)));
-  }
-
   double[] genRSSIMatrix(List<double[]> beaconLocations) {
     double[] originCoord = beaconLocations.stream()
         .reduce(new double[]{Double.MAX_VALUE, Double.MAX_VALUE}, (origin, v) -> {
