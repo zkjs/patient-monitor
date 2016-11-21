@@ -13,7 +13,7 @@
 - listen for socket.io messages, cache the tracks for given periods ( 5s )
 - positioning and save to tracks
 
-> 
+>
   - input> ap: bracelet:rssi:time
   - cache> bracelet stack of size 5 (when full or expired, pop all): ap-lnglat:distance
   - db> bracelet: position
@@ -21,17 +21,66 @@
 
 ## API
 
+- map objects [GET /map]
+
+            {
+              "status": "ok",
+              "data": {
+                "list": [{
+                  "obj": "e23",
+                  "gps": {"lng" : 104.061346, "lat" : 30.641574},
+                  "floors": 4,
+                  "drawables": [{
+                    "title": "emergency",
+                    "path": [
+                      [104.203348, 30.432538],
+                      [104.203229, 30.432341],
+                      [104.203962, 30.431997],
+                      [104.204082, 30.4322]
+                    ],
+                    "lng": 104.203655,
+                    "lat": 30.432268,
+                    "type": "AMap.Polygon"
+                  }]
+                }]
+              }
+            }
+
+- map layers [GET /map/{obj}/{floor}]
+
+            {
+              "status": "ok",
+              "data": {
+                "list": [{
+                  "obj": "e24",
+                  "floor": 2,
+                  "drawables": [{
+                    "title": "emergency",
+                    "type": "AMap.Polygon",
+                    "lng": 104.203355,
+                    "lat": 30.432499,
+                    "path": [
+                      [104.203348, 30.432538],
+                      [104.203229, 30.432341],
+                      [104.203962, 30.431997],
+                      [104.204082, 30.4322]
+                    ]
+                  }]
+                }]
+              }
+            }
+
 - respond to emergency [PUT /rescue]
 
   - request body
-  
-      {
-        "apid": "ap110",
-        "response": "doctorid"
-      }
+
+            {
+              "apid": "ap110",
+              "response": "doctorid"
+            }
 
   - response body
-  
+
       {
         "status": "ok"
       }
@@ -166,7 +215,7 @@
 
 
 ## Yunba.io
-      
+
 - broadcast msg for AP detected emergency:
 
       {
@@ -216,4 +265,3 @@ column | type | description
 -------|------|------------
 id | string | bracelet id
 position | array | LngLat with timestamp, ap, floor, position tracks of the bracelet
-
