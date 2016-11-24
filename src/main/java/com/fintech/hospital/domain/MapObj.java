@@ -78,7 +78,16 @@ public class MapObj {
     @Id
     private ObjectId id;
     private Integer floor;
+    private String title;
     private List<MapDrawable> drawables = new ArrayList<>();
+
+    public String getTitle() {
+      return title;
+    }
+
+    public void setTitle(String title) {
+      this.title = title;
+    }
 
     public ObjectId getId() {
       return id;

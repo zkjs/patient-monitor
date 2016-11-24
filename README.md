@@ -50,7 +50,7 @@
               }
             }
 
-- map layers(floor starts from 0) [GET /map/{obj}]
+- map layers(floor starts from 0) [GET /map/{objid}]
 
             {
               "status": "ok",
@@ -58,6 +58,7 @@
                 "list": [{
                   "id": "e24",
                   "floor": 2,
+                  "title": "Medicine",
                   "drawables": [{
                     "title": "emergency",
                     "type": "AMap.Polygon",
