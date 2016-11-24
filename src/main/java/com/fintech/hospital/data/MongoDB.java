@@ -1,12 +1,14 @@
 package com.fintech.hospital.data;
 
 import com.fintech.hospital.domain.*;
+import com.fintech.hospital.domain.MapObj.MapPart;
 import com.mongodb.BasicDBObject;
 import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationOperation;
@@ -19,6 +21,7 @@ import org.springframework.stereotype.Component;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -46,6 +49,15 @@ public class MongoDB {
 
   @Value("${db.collection.bracelet}")
   private String DB_BRACELET;
+
+  @Value("${db.collection.map.obj}")
+  private String DB_MAPOBJ;
+
+  @Value("${db.collection.map.part}")
+  private String DB_MAPPART;
+
+  @Value("${db.collection.map.drawable}")
+  private String DB_MAPDRAW;
 
   public AP getAP(String apid) {
     return template.findOne(new Query(where("name").is(apid)), AP.class, DB_AP);
@@ -77,7 +89,7 @@ public class MongoDB {
     );
   }
 
-  public BraceletPosition getBraecletLastPos(String bracelet){
+  public BraceletPosition getBraecletLastPos(String bracelet) {
     Query query = new Query(where("_id").is(bracelet));
     query.fields().slice("position", -2, 1);
     return template.findOne(
@@ -154,5 +166,58 @@ public class MongoDB {
         template.aggregate(Aggregation.newAggregation(matchBracelet, GROUP_BY_AP), DB_BT, SProjection.class)
             .getMappedResults();
     return results.stream().map(SProjection::getId).collect(Collectors.toList());
+  }
+
+  public List<MapObj> mapObjs() {
+    List<MapObj> mapObjs = template.findAll(MapObj.class, DB_MAPOBJ);
+
+    List<MapDrawable> drawables = template.find(
+        new Query(Criteria.where("part").in(mapObjs.stream().map(MapObj::getId).collect(Collectors.toList())))
+            .with(new Sort(Sort.Direction.ASC, "part")),
+        MapDrawable.class,
+        DB_MAPDRAW
+    );
+
+    for (MapObj obj : mapObjs) {
+      Iterator<MapDrawable> drawableIterator = drawables.iterator();
+      while (drawableIterator.hasNext()) {
+        MapDrawable drawable = drawableIterator.next();
+        if (drawable.getPart().equals(obj.getId())) {
+          obj.addDrawable(drawable);
+          drawableIterator.remove();
+        }
+      }
+    }
+
+    return mapObjs;
+  }
+
+  public List<MapPart> mapParts(String objId) {
+    List<MapPart> parts = template.find(
+        new Query(Criteria.where("owner").is(new ObjectId(objId)))
+            .with(new Sort(Sort.Direction.ASC, "id")),
+        MapPart.class,
+        DB_MAPPART
+    );
+    List<MapDrawable> drawables = template.find(
+        new Query(Criteria.where("part").in(parts.stream().map(MapPart::getId).collect(Collectors.toList())))
+            .with(new Sort(Sort.Direction.ASC, "part")),
+        MapDrawable.class,
+        DB_MAPDRAW
+    );
+
+    for (MapPart part : parts) {
+      Iterator<MapDrawable> drawableIterator = drawables.iterator();
+      while (drawableIterator.hasNext()) {
+        MapDrawable drawable = drawableIterator.next();
+        if (drawable.getPart().equals(part.getId())) {
+          part.addDrawable(drawable);
+          drawableIterator.remove();
+        }
+      }
+    }
+
+    return parts;
+
   }
 }

@@ -123,4 +123,8 @@ public class APMsg {
     return (payload.length()==52 && payload.substring(20,22).equalsIgnoreCase("A0")) || pkg[0] == 66;
   }
 
+  public boolean dropped(){
+    return pkg[0] == 68;
+  }
+
 }

@@ -318,18 +318,30 @@ public class RssiDistributionMeasure {
   }
 
 //  public static void main(String[] args) {
+//    int i=0;
+//
+//    long[] time = new long[10000];
+//
+//    while(i<10000) {
 //    RssiDistributionMeasure measure = new RssiDistributionMeasure();
 //    double[] origin = measure.genRSSIMatrix(Lists.newArrayList(
 //        new double[]{113.943667, 22.529193}, //110
 //        new double[]{113.94365, 22.529074}, //119
 //        new double[]{113.943704, 22.529133} //112
 //    ));
+//    //System.out.println(measure.rssiToDistance(-87));
 //
-//    System.out.println(measure.rssiToDistance(-87));
-//    Miniball miniball = measure.multiBeaconMiniball(new double[]{-71, -42, -85});
-//    System.out.println(miniball.toString());
-//    System.out.println(origin[0] + 5e-6*miniball.center()[0]);
-//    System.out.println(origin[1] + 5e-6*miniball.center()[1]);
+//
+//      long start = System.currentTimeMillis();
+//      Miniball miniball = measure.multiBeaconMiniball(new double[]{-71, -42, -85});
+////      System.out.println(miniball.toString());
+////      System.out.println(origin[0] + 5e-6 * miniball.center()[0]);
+////      System.out.println(origin[1] + 5e-6 * miniball.center()[1]);
+//      time[i] = System.currentTimeMillis()-start;
+//      i++;
+//    }
+//
+//    System.out.println(Arrays.stream(time).average().getAsDouble());
 //  }
 
 

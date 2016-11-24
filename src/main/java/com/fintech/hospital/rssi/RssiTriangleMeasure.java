@@ -181,30 +181,40 @@ public class RssiTriangleMeasure {
 //    m = 2.3889582,
 //    p = 3.6463172,
 //    T = -62;
-//    RssiDistanceModel model = new RssiDistanceModel(c, m, p, T);
-//    RssiTriangleMeasure measure = new RssiTriangleMeasure(Lists.newArrayList(
+//    int i=0;
+//    long[] time = new long[10000];
+//
+//    while(i<10000) {
+//      long start = System.currentTimeMillis();
+//      RssiDistanceModel model = new RssiDistanceModel(c, m, p, T);
+//      RssiTriangleMeasure measure = new RssiTriangleMeasure(Lists.newArrayList(
 ////        new Vector2D(113.943667, 22.529193),//110
 ////        new Vector2D(113.94365, 22.529074), //119
 ////        new Vector2D(113.943704, 22.529133) //112
 //
-//        new Vector2D(113.943656, 22.52919), //110
-//        new Vector2D(113.943701, 22.52919), //119
-//        new Vector2D(113.943656, 22.529217) //112
+//          new Vector2D(113.943656, 22.52919), //110
+//          new Vector2D(113.943701, 22.52919), //119
+//          new Vector2D(113.943656, 22.529217) //112
 //      ),
-//      Lists.newArrayList(
-//          model.distance(-81), //110
-//          model.distance(-76), //119
-//          model.distance(-78) //112
-//      ),
-//      1,
-//      false
-//    );
+//          Lists.newArrayList(
+//              model.distance(-81), //110
+//              model.distance(-76), //119
+//              model.distance(-78) //112
+//          ),
+//          1,
+//          false
+//      );
+//      measure.positioning();
+//      time[i] = System.currentTimeMillis()-start;
+//      i++;
+//    }
 //
-//    System.out.println(RssiMeasure.distance(new Vector2D(113.943656, 22.52919), new Vector2D(113.943701, 22.52919)));
-//    System.out.println(RssiMeasure.distance(new Vector2D(113.943656, 22.529217), new Vector2D(113.943701, 22.52919)));
-//    System.out.println(RssiMeasure.distance(new Vector2D(113.943656, 22.529217), new Vector2D(113.943656, 22.52919)));
-//    System.out.println(model.distance(-72));
-//    System.out.println(model.distance(-71));
+//    System.out.println(Arrays.stream(time).average().getAsDouble());
+////    System.out.println(RssiMeasure.distance(new Vector2D(113.943656, 22.52919), new Vector2D(113.943701, 22.52919)));
+////    System.out.println(RssiMeasure.distance(new Vector2D(113.943656, 22.529217), new Vector2D(113.943701, 22.52919)));
+////    System.out.println(RssiMeasure.distance(new Vector2D(113.943656, 22.529217), new Vector2D(113.943656, 22.52919)));
+////    System.out.println(model.distance(-72));
+////    System.out.println(model.distance(-71));
 ////    System.out.println(measure.positioning());
 ////    System.out.println(measure.getRadius());
 //  }
