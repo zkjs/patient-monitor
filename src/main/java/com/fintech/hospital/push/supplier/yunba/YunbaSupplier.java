@@ -2,7 +2,7 @@ package com.fintech.hospital.push.supplier.yunba;
 
 import com.alibaba.fastjson.JSONObject;
 import com.fintech.hospital.push.PushSupplier;
-import com.fintech.hospital.push.YunbaIO;
+import com.fintech.hospital.push.yunba.YunbaIO;
 import com.fintech.hospital.push.model.PushMsg;
 import org.springframework.beans.factory.annotation.Value;
 

@@ -9,8 +9,8 @@ import static org.springframework.beans.factory.config.BeanDefinition.SCOPE_SING
 /**
  * @author baoqiang
  */
-@Component("yunbaConsumer4Mon")
-@Scope(SCOPE_SINGLETON)
+//@Component("yunbaConsumer4Mon")
+//@Scope(SCOPE_SINGLETON)
 public class YunbaConsumer4Mon extends YunbaConsumer {
 
 

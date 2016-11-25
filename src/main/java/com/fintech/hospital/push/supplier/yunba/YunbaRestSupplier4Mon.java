@@ -10,8 +10,8 @@ import static org.springframework.beans.factory.config.ConfigurableBeanFactory.S
 /**
  * @author baoqiang
  */
-@Component("yunbaRestSupplier4Mon")
-@Scope(SCOPE_SINGLETON)
+//@Component("yunbaRestSupplier4Mon")
+//@Scope(SCOPE_SINGLETON)
 public class YunbaRestSupplier4Mon extends YunbaRestSupplier {
 
   @Autowired

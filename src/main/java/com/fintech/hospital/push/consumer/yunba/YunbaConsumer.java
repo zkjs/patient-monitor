@@ -2,7 +2,7 @@ package com.fintech.hospital.push.consumer.yunba;
 
 import com.alibaba.fastjson.JSONObject;
 import com.fintech.hospital.push.PushConsumer;
-import com.fintech.hospital.push.YunbaIO;
+import com.fintech.hospital.push.yunba.YunbaIO;
 import io.socket.IOAcknowledge;
 
 /**

@@ -16,6 +16,7 @@
 
     <zkjs.socket.ver>0.1-SNAPSHOT</zkjs.socket.ver>
     <app.ver>0.1</app.ver>
+    <paho.ver>1.1.0</paho.ver>
 
     <guava.ver>18.0</guava.ver>
     <ali.fastjson.ver>1.2.7</ali.fastjson.ver>
@@ -72,6 +73,15 @@
       <artifactId>fastjson</artifactId>
       <version>${ali.fastjson.ver}</version>
     </dependency>
+
+    <!-- mqtt -->
+    <!-- https://mvnrepository.com/artifact/org.eclipse.paho/org.eclipse.paho.client.mqttv3 -->
+    <dependency>
+      <groupId>org.eclipse.paho</groupId>
+      <artifactId>org.eclipse.paho.client.mqttv3</artifactId>
+      <version>${paho.ver}</version>
+    </dependency>
+
 
     <!-- commons utils -->
     <dependency>

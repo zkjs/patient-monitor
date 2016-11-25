@@ -10,8 +10,8 @@ import static org.springframework.beans.factory.config.ConfigurableBeanFactory.S
 /**
  * <b>DO NOT MODIFY THIS FILE: this is a direct copy from URSAMAJOR, refactor needed</b>
  */
-@Component("yunbaSupplier4Mon")
-@Scope(SCOPE_SINGLETON)
+//@Component("yunbaSupplier4Mon")
+//@Scope(SCOPE_SINGLETON)
 public class YunbaSupplier4Mon extends YunbaSupplier {
 
   @Autowired
