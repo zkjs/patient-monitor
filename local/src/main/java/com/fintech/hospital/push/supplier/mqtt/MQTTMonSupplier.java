@@ -15,7 +15,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 /**
  * @author baoqiang
  */
-//@Component("supplierMqtt")
+@Component("supplierMqtt")
 public class MQTTMonSupplier extends MQTTIO implements PushSupplier{
 
   protected MQTTMonSupplier(@Value("${mqtt.local.uri}") String uri) {
@@ -28,9 +28,6 @@ public class MQTTMonSupplier extends MQTTIO implements PushSupplier{
     }
     LOG.info("mqtt {} connected", uri);
   }
-
-  @Value("${mqtt.topic.trace}")
-  private String TRACE;
 
   @Override
   protected void subscribe(String topic) {

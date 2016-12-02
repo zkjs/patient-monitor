@@ -1,99 +1,11 @@
-# Remote Positioning
+# remote server deployment
 
-- listen for socket.io position messages:
-  - cache for realtime positioning
-  - save to local db ( tracks )
-- socket.io server (node.js): listen on local-position tracks for different hospitals
+- appserver: provides position api and positioning service
 
+- webui: basic map rendering, use with [zkjs/tools/bledevices](https://github.com/zkjs/tools/)
 
-## socket.io
+## AP naming scheme:
 
-### config
-
-            'connect': { token: $hospital, id: $custom_id }
-            'subscribe': { bracelet: $bracelet_id }
-            'publish': { topic: $topic, msg: $msg }
-
-
-### messages
-
-- `position` (publish on bracelet {bracelet_id})
-
-            {
-              "ap": "nearest ap addr",
-              "floor": 3,
-              "timestamp": 1478102400,
-              "radius": 23.121,
-              "gps": {"lng": 104.2312, "lat": 30.39102}
-            }
-
-## API
-
-- bracelet tracks [GET /track/{bracelet}]
-
-            {
-              "status": "ok",
-              "data": {
-                "list": [{
-                  "ap": "nearest ap addr",
-                  "floor": 2,
-                  "timestamp": 1478159590006,
-                  "radius": 23.121,
-                  "gps": {"lng" : 104.061346, "lat" : 30.641574}
-                }]
-            }
-
-- bracelet tracks(relative coords) [GET /track/rel/{bracelet}]
-
-            {
-              "status": "ok",
-              "data": {
-                "list": [{
-                  "ap": "ap112",
-                  "floor": 2,
-                  "timestamp": 1478159590006,
-                  "radius": 23.121,
-                  "gps": {"lng" : 10.0, "lat" : 0.641574}
-                }],
-                "aps": [{
-                  "address": "middle",
-                  "alias": "ap112",
-                  "floor": 2,
-                  "gps": {"lng": 12.212, "lat": 11.231}
-                }]
-            }
-
-- bracelet last position [GET /track/{bracelet}/last]
-
-            {
-              "status": "ok",
-              "data": {
-                "address": "West 204",
-                "floor": 2,
-                "timestamp": 1478159590006,
-                "radius": 23.121,
-                "gps": {"lng" : 104.061346, "lat" : 30.641574}
-              }
-            }
-
-
-## Data Model
-
-- Bracelet Trace
-
-column | type | description
--------|------|------------
-id | ObjectId | mongo default `_id`
-bracelet | string | bracelet id
-ap | string | ap id
-rssi | number | detected RSSI
-create | Date | create date of the trace
-
-
-- Bracelet Position
-
-column | type | description
--------|------|------------
-id | string | bracelet id
-position | array | LngLat with timestamp, ap, floor, position tracks of the bracelet
+`ENTITY_ALIAS.SERIAL`, in which `ENTITY_ALIAS`: 4-letter/digit combination of `2,3,4...9` and `A,B,C...H,J,...,N,P,Q,...,Z` (34^4 = 1336336)
+e.x. entity a with alias `AL3XK` and ap serial `16` => AP.name: `AL3XK.16`
 

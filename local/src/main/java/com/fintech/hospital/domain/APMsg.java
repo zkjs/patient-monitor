@@ -12,7 +12,7 @@ public class APMsg {
   @JSONField(name = "data")
   private String payload;
   private Integer rssi;
-  @JSONField(name = "bcid", serialize = false)
+  @JSONField(name = "bcid")
   private String bandId;
 
   @JSONField(serialize = false)
@@ -28,6 +28,14 @@ public class APMsg {
   public void fillAP(AP ap) {
     this.address = ap.getAddress();
     this.floor = ap.getFloor();
+  }
+
+  public String getBandId() {
+    return bandId;
+  }
+
+  public void setBandId(String bandId) {
+    this.bandId = bandId;
   }
 
   public Long getTimestamp() {
@@ -78,7 +86,7 @@ public class APMsg {
     this.bracelet = bracelet;
   }
 
-  private byte[] pkg;
+  private byte pkg;
 
   public String getApid() {
     return apid;
@@ -96,18 +104,7 @@ public class APMsg {
     if (payload == null)
       throw new IllegalArgumentException("payload format err");
     this.payload = payload;
-    if(payload.length()!=52) {
-      this.pkg = new byte[4];
-      pkg[0] = Byte.valueOf(payload.substring(2, 4));
-      this.bandId = payload.substring(4, 6);
-      for (int i = 3, j = 1; i < 6; i++) {
-        pkg[j++] = Byte.valueOf(payload.substring(i * 2, (i + 1) * 2));
-      }
-    }
-  }
-
-  public String braceletBleId() {
-    return bandId;
+    pkg = Byte.valueOf(payload.substring(2, 4));
   }
 
   public Integer getRssi() {
@@ -118,16 +115,12 @@ public class APMsg {
     this.rssi = rssi;
   }
 
-  public boolean binded() {
-    return pkg[2] == 1;
-  }
-
   public boolean urgent() {
-    return (payload.length()==52 && payload.substring(20,22).equalsIgnoreCase("A0")) || pkg[0] == 66;
+    return pkg == 66;
   }
 
   public boolean dropped(){
-    return pkg[0] == 68;
+    return pkg == 68;
   }
 
 }

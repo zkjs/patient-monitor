@@ -34,7 +34,7 @@ public class APConsumer implements PushConsumer {
   @Autowired
   private MongoDB mongo;
 
-  @Value("${mqtt.topic.rescue}")
+  @Value("${mqtt.topic.rescue.app}")
   private String RESCUE_TOPIC;
 
   @Value("${socket.io.event.position}")
@@ -42,25 +42,33 @@ public class APConsumer implements PushConsumer {
 
   @Override
   public void consume(String msg) {
-    LOG.info("consuming ap msg... {}", msg);
+    LOG.debug("consuming ap msg... {}", msg);
 
     try {
       APMsg apMsg = JSON.parseObject(msg, APMsg.class);
 
-      final Bracelet bracelet = mongo.getBracelet(apMsg.braceletBleId());
+      final Bracelet bracelet = mongo.getBracelet(apMsg.getBandId());
+      if (bracelet == null) {
+        LOG.warn("{} not registered yet", apMsg.getBandId());
+        return;
+      }
       final String braceletId = bracelet.getId().toHexString();
 
       if (apMsg.dropped()) {
+        /* dropped */
         braceletDropped(bracelet);
-      } else {
+      } else if (apMsg.urgent()) {
+        /* emergency */
         AP ap = mongo.getAP(apMsg.getApid());
-        apMsg.fillAP(ap);
-        if (apMsg.urgent()) emergency(apMsg, braceletId, bracelet.getPatientName());
-        else{
-          pushService.relay(new PushMsg(event, msg));
+        if (ap == null) {
+          LOG.warn("ap {} not found in db, check ap local configuration", apMsg.getApid());
+          return;
         }
+        apMsg.fillAP(ap);
+        notifyEmergency(apMsg, braceletId, bracelet.getPatientName());
+      } else {
+        pushService.relay(new PushMsg(event, JSON.toJSONString(apMsg)));
       }
-
     } catch (Exception e) {
       LOG.error("while consuming {} : {}", msg, e);
     }
@@ -74,11 +82,11 @@ public class APConsumer implements PushConsumer {
     });
   }
 
-  private void emergency(APMsg apMsg, String braceletId, String patient) {
+  private void notifyEmergency(APMsg apMsg, String braceletId, String patient) {
     /* categorize msg type: urgency (push to mon immediately for alert), tracing */
-    LOG.info("bracelet {}(BLE-ID) in emergency, detected by ap {}", apMsg.braceletBleId(), apMsg.getApid());
+    LOG.info("bracelet {}(BLE-ID) in emergency, detected by ap {}", apMsg.getBandId(), apMsg.getApid());
     apMsg.setBracelet(braceletId);
-    String alertMsg = String.format("%s (%s) 求救 ", patient, apMsg.braceletBleId());
+    String alertMsg = String.format("%s (%s) 求救 ", patient, apMsg.getBandId());
     apMsg.setMessage(alertMsg);
     String broadcast = JSON.toJSONString(apMsg);
     pushService.alert(new PushMsg(BROADCAST, RESCUE_TOPIC, broadcast));

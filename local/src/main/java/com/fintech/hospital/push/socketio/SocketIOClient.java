@@ -47,7 +47,6 @@ public abstract class SocketIOClient implements IOCallback {
   private void subEvents() {
     socket.on("ready", args -> {
       LOG.info("ready to send data");
-      socket.emit("aprssi", "{id: 'test', data: 'omg'}");
     });
   }
 

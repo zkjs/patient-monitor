@@ -26,8 +26,8 @@ public class PushService {
   @Qualifier("supplierSocketIO")
   private PushSupplier remoteSocket;
 
-//  @Autowired
-//  @Qualifier("supplierMqtt")
+  @Autowired
+  @Qualifier("supplierMqtt")
   private PushSupplier pushSupplier4AP;
 
   public void relay(PushMsg msg) {

@@ -1,26 +1,22 @@
 package com.fintech.hospital.data;
 
-import com.fintech.hospital.domain.*;
+import com.fintech.hospital.domain.AP;
+import com.fintech.hospital.domain.Bracelet;
+import com.fintech.hospital.domain.MapDrawable;
+import com.fintech.hospital.domain.MapObj;
 import com.fintech.hospital.domain.MapObj.MapPart;
-import com.mongodb.BasicDBObject;
 import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.aggregation.Aggregation;
-import org.springframework.data.mongodb.core.aggregation.AggregationOperation;
-import org.springframework.data.mongodb.core.aggregation.MatchOperation;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Component;
 
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -36,6 +32,7 @@ public class MongoDB {
   final Logger LOG = LoggerFactory.getLogger(MongoDB.class);
 
   @Autowired
+  @Qualifier("mapTemplate")
   private MongoTemplate template;
 
   @Value("${db.collection.ap}")

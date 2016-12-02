@@ -42,8 +42,9 @@ io.of('/app').on('connection', app => {
 
       debug('app server ready');
       app.on('position', data => {
-        debug('providing new pos for %s', data.id);
-        app.to(data.id).emit('position', data);
+        var obj = eval('(' + data + ')');
+        debug('providing new pos for %s', obj.id);
+        app.to(obj.id).emit('position', obj);
       });
 
     }
