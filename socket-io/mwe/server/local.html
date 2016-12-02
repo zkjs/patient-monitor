@@ -1,0 +1,17 @@
+<script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+<script>
+
+var socket = io('http://localhost:8000/server');
+socket.on('connect', function() {
+  console.log('connected ');
+
+  socket.on('ready', function() {
+    socket.emit('aprssi', {id: (new Date()).toISOString(), ap: '238121', rssi: -32, payload: '991029102912102912'});    
+  });
+
+  socket.emit('role', 'local');
+
+});
+
+
+</script>
