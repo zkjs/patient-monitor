@@ -4,7 +4,7 @@
      <div class="item-input">
         <select ng-model="model.id" >
           <option value="" disabled selected>选择AP</option>
-          <option ng-repeat="ap in aps track by ap._id" value='{{ap.id}}'>{{ap.id}}</option>
+          <option ng-repeat="ap in aps track by ap._id" value='{{ap.id}}'>{{ap.name}}</option>
         </select>
       </div>
     </li>

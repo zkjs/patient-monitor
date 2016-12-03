@@ -148,65 +148,65 @@
 
       endDrawing();
 
-      pouchDB('ap').allDocs({keys: Object.keys(cache.data), include_docs: true})
-      .then(function(res){
-        console.log('updating local ap detail ');
-        /* merge marker detail */
-        var updatedAPs = res.rows.map(function(row) {
-          return row.doc;
-        });
-        updatedAPs.forEach(function(ap) {
-          $.extend(ap, cache.data[ap._id]);
-          ap.status = 1;
-        });
-        return pouchDB('ap').bulkDocs(updatedAPs);
-      })
-      .then(function(res){
-        console.log('ap cache detail merged');
-        service.drawing.state = 0;
-        service.show();
-        service.showAP();
-      })
-      .catch(function(err){
-        console.error('merging marker details ' + err);
-      });
+      //pouchDB('ap').allDocs({keys: Object.keys(cache.data), include_docs: true})
+      //.then(function(res){
+      //  console.log('updating local ap detail ');
+      //  /* merge marker detail */
+      //  var updatedAPs = res.rows.map(function(row) {
+      //    return row.doc;
+      //  });
+      //  updatedAPs.forEach(function(ap) {
+      //    $.extend(ap, cache.data[ap._id]);
+      //    ap.status = 1;
+      //  });
+      //  return pouchDB('ap').bulkDocs(updatedAPs);
+      //})
+      //.then(function(res){
+      //  console.log('ap cache detail merged');
+      //  service.drawing.state = 0;
+      //  service.show();
+      //  service.showAP();
+      //})
+      //.catch(function(err){
+      //  console.error('merging marker details ' + err);
+      //});
 
       //TODO update remote models
-      //$http.put(
-      //  CONST.URL_APLIST, cache.data
-      //).then(function successCallback(resp) {
-      //  console.log('parse orgs ' + JSON.stringify(resp));
-      //  if( 
-      //      resp.status === 200 && 
-      //      resp.data.status === 'ok'
-      //  ){
-      //   pouchDB('ap').allDocs({keys: cache.data.map(function(ap){return ap.id;})})
-      //   .then(function(res){
-      //     console.log('updating local ap detail ');
-      //     /* merge marker detail */
-      //     var updatedAPs = res.rows.map(function(row) {
-      //       return row.doc;
-      //     });
-      //     updatedAPs.forEach(function(ap) {
-      //       $.extend(ap, cache.data[ap._id]);
-      //       ap.status = 1;
-      //     });
-      //     return pouchDB('ap').put(updatedAPs);
-      //   })
-      //   .then(function(res){
-      //     console.log('ap cache detail merged');
-      //     ctrl.clearModel();
-      //     snapTools.clearUnsaved();
-      //     snapTools.showAP();
-      //   })
-      //   .catch(function(err){
-      //     //TODO roll back local change if remote update failed
-      //     console.error('merging marker details ' + err);
-      //   });
-      //  }
-      //}, function errorCallback(errResp){
-      //  console.error('failed to fetch basic data ' + JSON.stringify(errResp));
-      //});
+      $http.post(
+        CONST.URL_APLIST, Object.values(cache.data)
+      ).then(function successCallback(resp) {
+        console.log('parse orgs ' + JSON.stringify(resp));
+        if( 
+            resp.status === 200 && 
+            resp.data.status === 'ok'
+        ){
+         pouchDB('ap').allDocs({
+           keys: Object.values(cache.data).map(function(ap){return ap.id;})
+         }).then(function(res){
+           console.log('updating local ap detail ');
+           /* merge marker detail */
+           var updatedAPs = res.rows.map(function(row) {
+             return row.doc;
+           });
+           updatedAPs.forEach(function(ap) {
+             $.extend(ap, cache.data[ap.id]);
+             ap.status = 1;
+           });
+           return pouchDB('ap').put(updatedAPs);
+         })
+         .then(function(res){
+           console.log('ap cache detail merged');
+           service.clearUnsaved();
+           service.showAP();
+         })
+         .catch(function(err){
+           //TODO roll back local change if remote update failed
+           console.error('merging marker details ' + err);
+         });
+        }
+      }, function errorCallback(errResp){
+        console.error('failed to fetch basic data ' + JSON.stringify(errResp));
+      });
     };
 
     this.cancel = function() {

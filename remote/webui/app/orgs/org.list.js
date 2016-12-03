@@ -19,58 +19,56 @@
     drawTools.show();
 
     /* TODO remove for production */
-    pouchDB('org').allDocs({include_docs: true})
-    .then(function(orgs){
-       $scope.orgs = orgs.rows.map(function(row){ return row.doc; });
-    });
+    //pouchDB('org').allDocs({include_docs: true})
+    //.then(function(orgs){
+    //   $scope.orgs = orgs.rows.map(function(row){ return row.doc; });
+    //});
 
 
     //TODO get from remote server
-    //$http({ method: 'GET', url: CONST.URL_ORGLIST })
-    //.then(function successCallback(resp) {
-    //  console.log('parse orgs ' + JSON.stringify(resp));
-    //  if( 
-    //      resp.status === 200 && 
-    //      resp.data.status === 'ok'
-    //  ){
-    //    pouchDB('org').destroy().then(function(res){
-    //      $scope.orgs = resp.data.data.map(function(org){
-    //        org.parts = [];
-    //        return org;
-    //      });
-    //      pouchDB('org').bulkDocs($scope.orgs).then(function(res){
-    //        console.log('buildings loaded from remote server: ' + resp.data.data.length);
-    //      });
-    //    });
-    //  }
-    //}, function errorCallback(errResp){
-    //  console.error('failed to fetch basic data ' + JSON.stringify(errResp));
-    //});
+    $http({ method: 'GET', url: CONST.URL_ORGLIST })
+    .then(function successCallback(resp) {
+      console.log('parse orgs ' + JSON.stringify(resp));
+      if( 
+          resp.status === 200 && 
+          resp.data.status === 'ok'
+      ){
+        pouchDB('org').destroy().then(function(res){
+          $scope.orgs = resp.data.data.map(function(org){
+            org.parts = [];
+            return org;
+          });
+          pouchDB('org').bulkDocs($scope.orgs).then(function(res){
+            console.log('buildings loaded from remote server: ' + resp.data.data.length);
+          });
+        });
+      }
+    }, function errorCallback(errResp){
+      console.error('failed to fetch basic data ' + JSON.stringify(errResp));
+    });
 
-    //$http({ method: 'GET',url: CONST.URL_APLIST})
-    //.then(function successCallback(resp) {
-    //  console.log('parse aplist ' + JSON.stringify(resp));
-    //  if(
-    //    resp.status === 200 &&
-    //    resp.data.status === 'ok'
-    //  ) {
-    //    pouchDB('ap').bulkDocs(
-    //      resp.data.map(function(ap) {
-    //        if(!!ap.floor){
-    //          ap._id = ap.floor + '.' + ap.id;
-    //        }else{
-    //          ap._id = ap.id;
-    //        }
-    //        ap.type = 'AMap.Marker';
-    //        return ap;
-    //      })
-    //    ).then(function(res) {
-    //      console.log('ap loaded from remote server ' );
-    //    });
-    //  }
-    //}, function errorCallback(perr) {
-    //  console.error('failed to cache ap list ' + perr);
-    //});
+    $http({ method: 'GET',url: CONST.URL_APLIST})
+    .then(function successCallback(resp) {
+      console.log('parse aplist ' + JSON.stringify(resp));
+      if(
+        resp.status === 200 &&
+        resp.data.status === 'ok'
+      ) {
+        pouchDB('ap').bulkDocs(
+          resp.data.data.map(function(ap) {
+            if(!!ap.floor){
+              ap._id = ap.floor + '.' + ap._id;
+            }
+            ap.type = 'AMap.Marker';
+            return ap;
+          })
+        ).then(function(res) {
+          console.log('ap loaded from remote server ' );
+        });
+      }
+    }, function errorCallback(perr) {
+      console.error('failed to cache ap list ' + perr);
+    });
 
     /* org item onclick: go to item's object list */
     $scope.manage = function(org) {

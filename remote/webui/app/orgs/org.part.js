@@ -43,7 +43,7 @@
     .catch(function(err){
       console.error('err fetching parts ' + err);
       /* when no cache found, init data via remote fetching */
-      $http({ method: 'GET',url: CONST.URL_PARTLIST.replace(':orgid', org._id)})
+      $http({ method: 'GET',url: CONST.URL_PARTLIST.replace(':orgid', org._id)+'/'})
       .then(function successCallback(resp) {
         console.log('parse parts ' + JSON.stringify(resp));
         if( 
