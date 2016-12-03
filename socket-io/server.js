@@ -53,7 +53,7 @@ io.of('/app').on('connection', app => {
   });
 
   
-  debug('connected ' + app.id);
+  debug('%s connected from %s ', app.id, app.request.connection.remoteAddress;);
 
 });
 
@@ -80,7 +80,7 @@ io.of('/server').on('connection', svr => {
   });
 
   
-  debug('connected ' + svr.id);
+  debug('%s connected from %s ', svr.id, svr.request.connection.remoteAddress;);
 
 });
 
