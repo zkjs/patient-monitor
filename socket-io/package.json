@@ -4,8 +4,9 @@
   "description": "remote socket.io server",
   "main": "index.js",
   "dependencies": {
-    "socket.io": "^1.7.1",
-    "debug": "^2.3.3"
+    "bunyan": "^1.8.5",
+    "debug": "^2.3.3",
+    "socket.io": "^1.7.1"
   },
   "devDependencies": {},
   "scripts": {

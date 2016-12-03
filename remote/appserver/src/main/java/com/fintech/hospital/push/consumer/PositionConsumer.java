@@ -68,8 +68,8 @@ public class PositionConsumer implements PushConsumer {
       /* based on ap signals, try to locate the patient */
       TimedPosition pos = position(positions, braceletId);
 
-      //TODO push the position
-      if (pos != null) {
+      /* push the position if someone's listening */
+      if (pos != null && cache.listening(pos.getId())) {
         JSONObject positionMsg = new JSONObject();
         positionMsg.put("id", pos.getId());
         positionMsg.put("position", pos);

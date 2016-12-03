@@ -1,12 +1,16 @@
 package com.fintech.hospital.data;
 
 import com.fintech.hospital.domain.TimedPosition;
+import com.google.common.collect.Sets;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * @author baoqiang
@@ -51,12 +55,25 @@ public class Cache {
     ConcurrentHashMap<String, TimedPosition> data = new ConcurrentHashMap<>(5);
     long timestamp;
 
-
     BraceletPosCache(long timestamp, ConcurrentHashMap<String, TimedPosition> data) {
       this.timestamp = timestamp;
       this.data.putAll(data);
     }
 
+  }
+
+  private static final Set<String> SUBSCRIPTIONS = Sets.newConcurrentHashSet();
+
+  public void sub(String braceletId) {
+    if (isNotBlank(braceletId)) SUBSCRIPTIONS.add(braceletId);
+  }
+
+  public void unsub(String braceletId) {
+    if (isNotBlank(braceletId)) SUBSCRIPTIONS.remove(braceletId);
+  }
+
+  public boolean listening(String braceletId) {
+    return SUBSCRIPTIONS.contains(braceletId);
   }
 
 }
