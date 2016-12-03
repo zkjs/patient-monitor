@@ -30,7 +30,7 @@ var app = require('http').createServer(handler);
 var io = require('socket.io')(app);
 var fs = require('fs');
 
-app.listen(8000);
+app.listen(9000);
 
 function handler (req, res) {
   fs.readFile(__dirname + '/index.html',
@@ -93,7 +93,7 @@ io.of('/app').on('connection', app => {
 
 io.of('/server').on('connection', svr => {
 
-  svrlog('%s connected from %s ', svr.id, svr.request.connection.remoteAddress);
+  svrlog.info('%s connected from %s ', svr.id, svr.request.connection.remoteAddress);
 
   svr.on('role', role => {
     svr.join(role);
@@ -101,12 +101,12 @@ io.of('/server').on('connection', svr => {
     if('local'===role){
 
       debug('local server ready');
-      svrlog.info('local svr %s ready', srv.request.connection.remoteAddress);
+      svrlog.info('local svr %s ready', svr.request.connection.remoteAddress);
 
       svr.on('aprssi', data => {
 
         svr.to('aprssi').emit('aprssi', data);
-        svrlog.info('local server %s reporting position', srv.request.connection.remoteAddress);
+        svrlog.info('local server %s reporting position', svr.request.connection.remoteAddress);
 
       });
 
@@ -114,7 +114,7 @@ io.of('/server').on('connection', svr => {
 
       svr.join('aprssi');
       debug('remote server ready');
-      svrlog.info('remote svr %s ready', srv.request.connection.remoteAddress);
+      svrlog.info('remote svr %s ready', svr.request.connection.remoteAddress);
 
     }
 
