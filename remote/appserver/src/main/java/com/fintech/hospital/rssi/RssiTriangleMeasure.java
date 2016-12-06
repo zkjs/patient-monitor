@@ -120,8 +120,8 @@ public class RssiTriangleMeasure {
     if (Math.abs(currentDiff - previousDiff) > 1.2 * tolerance && currentDeviation > previousDeviation)
       return null;
     else {
-//      System.out.println("error: " + Arrays.toString(nextDiffs));
-//      System.out.println("next: " + nextPoint);
+      LOG.debug("error: {} ", Arrays.toString(nextDiffs));
+      LOG.debug("next: {}" + nextPoint);
       return nextPoint;
     }
   }
