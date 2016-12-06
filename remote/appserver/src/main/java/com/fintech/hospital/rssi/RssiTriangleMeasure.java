@@ -41,7 +41,7 @@ public class RssiTriangleMeasure {
       int next = i + 1 == points.size() ? 0 : i + 1;
       linesLength.add(euclidean ?
           trianglePoints.get(i).distance(trianglePoints.get(next)) :
-          RssiMeasure.distance(trianglePoints.get(i), trianglePoints.get(next))
+          RssiMeasure.sphereDistance(trianglePoints.get(i), trianglePoints.get(next))
       );
     }
   }
@@ -149,7 +149,7 @@ public class RssiTriangleMeasure {
         .mapToDouble(i ->
             (this.euclidean ?
                 aPoint.distance(points.get(i)) :
-                RssiMeasure.distance(aPoint, points.get(i))
+                RssiMeasure.sphereDistance(aPoint, points.get(i))
             ) - radiuss.get(i)
         ).toArray();
   }

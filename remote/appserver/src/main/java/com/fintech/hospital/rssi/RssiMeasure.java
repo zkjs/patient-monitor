@@ -1,5 +1,6 @@
 package com.fintech.hospital.rssi;
 
+import com.alibaba.fastjson.JSON;
 import com.dreizak.miniball.highdim.Miniball;
 import com.fintech.hospital.domain.AP;
 import com.fintech.hospital.domain.LngLat;
@@ -36,14 +37,20 @@ public class RssiMeasure {
 
   public static TimedPosition positionByTriangleGradient(
       List<TimedPosition> positions,
-      List<AP> apList
+      List<AP> apList,
+      boolean euclideanDistance
   ) {
+    LOG.trace("triangle in positions: {}", JSON.toJSONString(positions));
+    LOG.trace("triangle in aps: {}", JSON.toJSONString(apList));
     RssiTriangleMeasure measure = new RssiTriangleMeasure(
-        apList.stream().sorted((ap1, ap2) -> ap1.getAlias().compareToIgnoreCase(ap2.getAlias())).map(ap -> ap.getGps().vector()).collect(Collectors.toList()),
-        positions.stream().sorted((pos1, pos2) -> pos1.getAp().compareToIgnoreCase(pos2.getAp()))
+        apList.stream()
+            .sorted((ap1, ap2) -> ap1.getAlias().compareToIgnoreCase(ap2.getAlias()))
+            .map(ap -> ap.getGps().vector()).collect(Collectors.toList()),
+        positions.stream()
+            .sorted((pos1, pos2) -> pos1.getAp().compareToIgnoreCase(pos2.getAp()))
             .map(TimedPosition::getRadius).collect(Collectors.toList()),
         0.5,
-        false
+        euclideanDistance
     );
     Vector2D evaluation = measure.positioning();
     TimedPosition start = TimedPosition.mean(positions, null);
@@ -58,8 +65,16 @@ public class RssiMeasure {
       List<AP> apList
   ) {
     RssiDistributionMeasure measure = new RssiDistributionMeasure();
-    double[] originCoord = measure.genRSSIMatrix(apList.stream().sorted((ap1, ap2) -> ap1.getAlias().compareToIgnoreCase(ap2.getAlias())).map(ap -> ap.getGps().arr()).collect(Collectors.toList()));
-    Miniball miniball = measure.multiBeaconMiniball(positions.stream().sorted((pos1, pos2) -> pos1.getAp().compareToIgnoreCase(pos2.getAp())).mapToDouble(TimedPosition::getRssi).toArray());
+    double[] originCoord = measure.genRSSIMatrix(
+        apList.stream()
+            .sorted((ap1, ap2) -> ap1.getAlias().compareToIgnoreCase(ap2.getAlias()))
+            .map(ap -> ap.getGps().arr()).collect(Collectors.toList())
+    );
+    Miniball miniball = measure.multiBeaconMiniball(
+        positions.stream()
+            .sorted((pos1, pos2) -> pos1.getAp().compareToIgnoreCase(pos2.getAp()))
+            .mapToDouble(TimedPosition::getRssi).toArray()
+    );
 
     double distanceSum = positions.stream().mapToDouble(TimedPosition::getRadius).sum();
     double ratioSum = positions.stream().mapToDouble(p -> distanceSum - p.getRadius()).sum();
@@ -92,12 +107,12 @@ public class RssiMeasure {
 
     LOG.debug("center coords: {}", gcenter);
 
-    double dist = distance(gcenter, originCoord);
+    double dist = sphereDistance(gcenter, originCoord);
     double pixelScale = 480 / dist;
     points.forEach(p -> {
       p.getGps().set(
-          pixelScale * distance(new Vector2D(p.getGps().getLng(), 0), new Vector2D(originCoord.getX(), 0)),
-          pixelScale * distance(new Vector2D(0, originCoord.getY()), new Vector2D(0, p.getGps().getLat()))
+          pixelScale * sphereDistance(new Vector2D(p.getGps().getLng(), 0), new Vector2D(originCoord.getX(), 0)),
+          pixelScale * sphereDistance(new Vector2D(0, originCoord.getY()), new Vector2D(0, p.getGps().getLat()))
       );
       p.setRadius(pixelScale * p.getRadius() / dist);
     });
@@ -114,7 +129,7 @@ public class RssiMeasure {
       RealMatrix jacobian = new Array2DRowRealMatrix(observes.size(), 2);
       for (int i = 0; i < observes.size(); ++i) {
         Vector2D o = observes.get(i);
-        double modelI = euclidean ? Vector2D.distance(o, center) : distance(o, center);
+        double modelI = euclidean ? Vector2D.distance(o, center) : sphereDistance(o, center);
         value.setEntry(i, modelI);
         jacobian.setEntry(i, 0, (center.getX() - o.getX()) / modelI);
         jacobian.setEntry(i, 1, (center.getY() - o.getY()) / modelI);
@@ -178,7 +193,7 @@ public class RssiMeasure {
       RealMatrix jacobian = new Array2DRowRealMatrix(observes.size(), 2);
       for (int i = 0; i < observes.size(); ++i) {
         Vector2D o = observes.get(i);
-        double modelI = euclidean ? Vector2D.distance(o, center) : distance(o, center);
+        double modelI = euclidean ? Vector2D.distance(o, center) : sphereDistance(o, center);
         value.setEntry(i, modelI);
         jacobian.setEntry(i, 0, (center.getX() - o.getX()) / modelI);
         jacobian.setEntry(i, 1, (center.getY() - o.getY()) / modelI);
@@ -211,7 +226,7 @@ public class RssiMeasure {
     return start;
   }
 
-  static double distance(Vector2D o, Vector2D center) {
+  static double sphereDistance(Vector2D o, Vector2D center) {
     double dlong = (o.getX() - center.getX()) * DEG_2_RAD;
     double dlat = (o.getY() - center.getY()) * DEG_2_RAD;
     double a = Math.pow(Math.sin(dlat / 2D), 2D)
@@ -240,16 +255,16 @@ public class RssiMeasure {
 
     LOG.debug("center coords: {}", gcenter);
 
-    double pixelScale = 960 / (2 * distance(gcenter, originCoord));
+    double pixelScale = 960 / (2 * sphereDistance(gcenter, originCoord));
     points.forEach(p -> p.getGps().set(
-        pixelScale * distance(new Vector2D(p.getGps().getLng(), 0), new Vector2D(originCoord.getX(), 0)),
-        pixelScale * distance(new Vector2D(0, originCoord.getY()), new Vector2D(0, p.getGps().getLat()))
+        pixelScale * sphereDistance(new Vector2D(p.getGps().getLng(), 0), new Vector2D(originCoord.getX(), 0)),
+        pixelScale * sphereDistance(new Vector2D(0, originCoord.getY()), new Vector2D(0, p.getGps().getLat()))
     ));
     LOG.debug("pixel scale: {}", pixelScale);
 
     apList.stream().forEach(ap -> ap.setGps(
-        pixelScale * distance(new Vector2D(ap.getLongitude(), 0), new Vector2D(originCoord.getX(), 0)),
-        pixelScale * distance(new Vector2D(0, originCoord.getY()), new Vector2D(0, ap.getLatitude()))
+        pixelScale * sphereDistance(new Vector2D(ap.getLongitude(), 0), new Vector2D(originCoord.getX(), 0)),
+        pixelScale * sphereDistance(new Vector2D(0, originCoord.getY()), new Vector2D(0, ap.getLatitude()))
     ));
   }
 

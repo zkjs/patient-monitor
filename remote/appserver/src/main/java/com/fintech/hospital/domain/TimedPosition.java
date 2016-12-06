@@ -3,6 +3,7 @@ package com.fintech.hospital.domain;
 import com.alibaba.fastjson.annotation.JSONField;
 import com.fintech.hospital.rssi.RssiDistanceModel;
 import org.springframework.data.annotation.Transient;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.util.Arrays;
 import java.util.Date;
@@ -23,6 +24,7 @@ public class TimedPosition {
 
   //final RssiDistanceModel RSSI_MODEL2 = new RssiDistanceModel(-0.7801144,2.3889582, 3.6463172,-62);
   @JSONField(serialize = false)
+  @Transient
   private final RssiDistanceModel RSSI_MODEL = new RssiDistanceModel(-2.025513, 3.902773, 1.987332, -59);
 
 

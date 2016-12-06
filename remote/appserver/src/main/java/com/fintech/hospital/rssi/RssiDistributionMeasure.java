@@ -56,7 +56,7 @@ public class RssiDistributionMeasure {
         double[] sigs;
         if (beaconLocations.size() == 1) {
           /* distance in meters, every meter away */
-          double distance = RssiMeasure.distance(
+          double distance = RssiMeasure.sphereDistance(
               new Vector2D(beaconLocations.get(0)),
               new Vector2D(originCoord[0] + i * 5e-6, originCoord[1] + j * 5e-6));
           rssiMatrix[idx][jdx] = rssiFromDistance(distance);
@@ -65,7 +65,7 @@ public class RssiDistributionMeasure {
           double[] distances = new double[beaconLocations.size()];
           for (int di = 0; di < distances.length; di++) {
             distances[di] =
-                RssiMeasure.distance(
+                RssiMeasure.sphereDistance(
                     new Vector2D(beaconLocations.get(di)),
                     new Vector2D(originCoord[0] + i * 5e-6, originCoord[1] + j * 5e-6)
                 );

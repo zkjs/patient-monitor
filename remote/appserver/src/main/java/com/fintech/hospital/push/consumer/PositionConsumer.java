@@ -103,8 +103,7 @@ public class PositionConsumer implements PushConsumer {
         LOG.debug("aps: {}", apList);
         braceletPosition =
             USE_TRIANGLE ?
-//                  positioning(positions, braceletId, null, USE_EUCLIDEAN) :
-                positionByTriangleGradient(positions, apList) :
+                positionByTriangleGradient(positions, apList, USE_EUCLIDEAN) :
                 positionFromDistribution(positions, mongo.getAPByNames(mongo.tracedAP(braceletId)));
         break;
     }
