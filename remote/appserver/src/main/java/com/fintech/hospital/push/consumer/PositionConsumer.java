@@ -121,7 +121,7 @@ public class PositionConsumer implements PushConsumer {
   private List<TimedPosition> recordTrace(AP ap, int rssi, String braceletId) {
     runAsync(() -> mongo.addBraceletTrace(
         braceletId,
-        new BraceletTrace(ap.getId().toHexString(), rssi, ap.getGps())
+        new BraceletTrace(ap.getAlias(), rssi, ap.getGps())
     ));
       /* pop all latest positions */
     return cache.push(braceletId, ap.getAlias(), new TimedPosition(ap, System.currentTimeMillis(), rssi));
