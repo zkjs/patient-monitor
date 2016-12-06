@@ -49,7 +49,7 @@ public class RssiMeasure {
         positions.stream()
             .sorted((pos1, pos2) -> pos1.getAp().compareToIgnoreCase(pos2.getAp()))
             .map(TimedPosition::getRadius).collect(Collectors.toList()),
-        0.5,
+        2,
         euclideanDistance
     );
     Vector2D evaluation = measure.positioning();
