@@ -1,28 +1,34 @@
 const bunyan = require('bunyan');
+const RotatingFS = require('bunyan-rotating-file-stream');
+function rotatingstream(path){
+  return new RotatingFS({
+      path: path,
+      period: '1d', // daily rotation 
+      totalFiles: 30, // keep 30 back copies 
+      rotateExisting: true,
+      threshold: '50m',
+      totalSize: '10240m',
+      gzip: true
+  });
+}
 const debug = require('debug')('socket.io');
 const accesslog = bunyan.createLogger({
   name: 'socket.io-access',
   streams: [{
-    type: 'rotating-file',
-    path: 'log/sio-access.log',
-    period: '1d', // daily rotation 
-    count: 30 // keep 3 back copies 
+    type: 'raw',
+    stream: rotatingstream('log/sio-access.log')  
   }]
 }), svrlog = bunyan.createLogger({
   name: 'socket.io-server',
   streams: [{
-    type: 'rotating-file',
-    path: 'log/sio-server.log',
-    period: '1d', // daily rotation 
-    count: 30 // keep 3 back copies 
+    type: 'raw',
+    stream: rotatingstream('log/sio-server.log')
   }]
 }), applog = bunyan.createLogger({
   name: 'socket.io-app',
   streams: [{
-    type: 'rotating-file',
-    path: 'log/sio-app.log',
-    period: '1d', // daily rotation 
-    count: 30 // keep 3 back copies 
+    type: 'raw',
+    stream: rotatingstream('log/sio-app.log')
   }]
 });
 
@@ -75,7 +81,7 @@ io.of('/app').on('connection', app => {
       debug('app server ready');
       applog.info('app server %s ready', app.request.connection.remoteAddress);
       app.on('position', data => {
-        var obj = eval('(' + data + ')');
+        var obj = JSON.parse(data);
         applog.info('new position for %s', obj.id);
         debug('providing new pos for %s', obj.id);
         app.to(obj.id).emit('position', obj);
