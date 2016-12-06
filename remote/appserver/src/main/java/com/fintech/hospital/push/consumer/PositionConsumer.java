@@ -22,6 +22,7 @@ import static com.fintech.hospital.domain.TimedPosition.mean;
 import static com.fintech.hospital.rssi.RssiMeasure.positionByTriangleGradient;
 import static com.fintech.hospital.rssi.RssiMeasure.positionFromDistribution;
 import static java.util.concurrent.CompletableFuture.runAsync;
+import static java.util.concurrent.CompletableFuture.supplyAsync;
 import static org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE;
 
 /**
@@ -55,7 +56,7 @@ public class PositionConsumer implements PushConsumer {
   public void consume(String msg) {
     LOG.debug("consuming ap msg... {}", msg);
 
-    try {
+    runAsync(()->{
       APMsg apMsg = JSON.parseObject(msg, APMsg.class);
 
       final Bracelet bracelet = mongo.getBracelet(apMsg.getBandId());
@@ -75,10 +76,10 @@ public class PositionConsumer implements PushConsumer {
         positionMsg.put("position", pos);
         pushService.notifyPosition(new PushMsg(posChannel4App, positionMsg.toJSONString()));
       }
-
-    } catch (Exception e) {
-      LOG.error("while consuming {} :", msg, e);
-    }
+    }).exceptionally(t ->{
+      LOG.error("while consuming {} :", msg, t);
+      return null;
+    });
   }
 
   private TimedPosition position(List<TimedPosition> positions, String braceletId) {
