@@ -56,7 +56,7 @@
       ) {
         pouchDB('ap').bulkDocs(
           resp.data.data.map(function(ap) {
-            if(!!ap.floor){
+            if(!!ap.floor && !!ap.status){
               ap._id = ap.floor + '.' + ap._id;
             }
             ap.type = 'AMap.Marker';

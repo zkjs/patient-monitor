@@ -180,29 +180,30 @@
             resp.status === 200 && 
             resp.data.status === 'ok'
         ){
-         pouchDB('ap').allDocs({
-           keys: Object.values(cache.data).map(function(ap){return ap.id;})
-         }).then(function(res){
-           console.log('updating local ap detail ');
-           /* merge marker detail */
-           var updatedAPs = res.rows.map(function(row) {
-             return row.doc;
-           });
-           updatedAPs.forEach(function(ap) {
-             $.extend(ap, cache.data[ap.id]);
-             ap.status = 1;
-           });
-           return pouchDB('ap').put(updatedAPs);
-         })
-         .then(function(res){
-           console.log('ap cache detail merged');
-           service.clearUnsaved();
-           service.showAP();
-         })
-         .catch(function(err){
-           //TODO roll back local change if remote update failed
-           console.error('merging marker details ' + err);
-         });
+          pouchDB('ap').allDocs({
+            keys: Object.values(cache.data).map(function(ap){return ap.id;}),
+            include_docs: true
+          }).then(function(res){
+            console.log('updating local ap detail ' + JSON.stringify(res.rows));
+            /* merge marker detail */
+            var updatedAPs = res.rows.map(function(row) {
+              return row.doc;
+            });
+            updatedAPs.forEach(function(ap) {
+              $.extend(ap, cache.data[ap.id]);
+              ap.status = 1;
+            });
+            return pouchDB('ap').put(updatedAPs);
+          })
+          .then(function(res){
+            console.log('ap cache detail merged');
+            service.clearUnsaved();
+            service.showAP();
+          })
+          .catch(function(err){
+            //TODO roll back local change if remote update failed
+            console.error('merging marker details ' + err);
+          });
         }
       }, function errorCallback(errResp){
         console.error('failed to fetch basic data ' + JSON.stringify(errResp));
