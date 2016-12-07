@@ -23,9 +23,10 @@ public class TimedPosition {
   }
 
   //final RssiDistanceModel RSSI_MODEL2 = new RssiDistanceModel(-0.7801144,2.3889582, 3.6463172,-62);
+//  private final RssiDistanceModel RSSI_MODEL = new RssiDistanceModel(-2.025513, 3.902773, 1.987332, -59);
   @JSONField(serialize = false)
   @Transient
-  private final RssiDistanceModel RSSI_MODEL = new RssiDistanceModel(-2.025513, 3.902773, 1.987332, -59);
+  private final RssiDistanceModel RSSI_MODEL = new RssiDistanceModel(-0.4105552, 1.2269221, 6.0833473, -57);
 
   public TimedPosition() {
   }
