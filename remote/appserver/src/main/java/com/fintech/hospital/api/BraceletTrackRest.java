@@ -14,8 +14,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.fintech.hospital.rssi.RssiMeasure.transform2RelativeCoords;
+import static java.util.stream.Collectors.groupingBy;
 
 /**
  * @author baoqiang
@@ -31,9 +33,16 @@ public class BraceletTrackRest {
   public Object tracks(@PathVariable("bid") String bracelet) {
     if (bracelet == null || bracelet.length() < 23) bracelet = "581b1a6542aa101eebc77e61";
     BraceletPosition position = mongo.getBraceletTrack(bracelet);
+
     if (position == null) return "{'status': 'err', 'error': 'bracelet not found'}";
+
+    List<TimedPosition> lastestDiffPosList = position.getPosition().stream()
+        .collect(groupingBy(timedPosition -> {
+          LngLat lnglat = timedPosition.getGps();
+          return String.format("%.1f-%.1f", lnglat.getLng(), lnglat.getLat());
+        })).values().stream().map(c -> c.get(0)).collect(Collectors.toList());
     return ImmutableMap.of(
-        "list", position.getPosition()
+        "list", lastestDiffPosList
     );
   }
 

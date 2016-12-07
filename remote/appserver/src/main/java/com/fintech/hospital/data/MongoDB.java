@@ -81,7 +81,7 @@ public class MongoDB {
 
   public BraceletPosition getBraceletTrack(String bracelet) {
     Query query = new Query(where("_id").is(bracelet));
-    query.fields().slice("position", -30, 30);
+    query.fields().slice("position", -300, 300);
     return template.findOne(
         query,
         BraceletPosition.class,
