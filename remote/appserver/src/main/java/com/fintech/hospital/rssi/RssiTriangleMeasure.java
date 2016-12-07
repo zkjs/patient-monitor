@@ -112,7 +112,7 @@ public class RssiTriangleMeasure {
     Vector2D nextPoint = decrGradient(points.get(maxDiffIdx), current, diffs[maxDiffIdx]);
     double[] nextDiffs = diffs(nextPoint);
     double currentDiff = Arrays.stream(nextDiffs).map(Math::abs).sum();
-    if (Math.abs(currentDiff - previousDiff) > 1.2 * tolerance)
+    if (currentDiff > previousDiff)
       return null;
     else {
       LOG.debug("error: {} ", Arrays.toString(nextDiffs));
