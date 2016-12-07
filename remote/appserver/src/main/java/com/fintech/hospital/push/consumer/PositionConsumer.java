@@ -109,13 +109,22 @@ public class PositionConsumer implements PushConsumer {
                 positionFromDistribution(positions, mongo.getAPByNames(mongo.tracedAP(braceletId)));
         break;
     }
-    if (lastPos != null) braceletPosition =
-        mean(Lists.newArrayList(braceletPosition,
-            lastPos.getPosition().get(lastPos.getPosition().size() - 1)),
-            new double[]{0.7, 0.3}
-        );
-    mongo.addBraceletPosition(braceletId, braceletPosition);
-    LOG.info("BASED ON {}, GOT NEW POS {} 4-bracelet {} ", positions.size(), braceletPosition, braceletId);
+    if (lastPos != null) {
+      TimedPosition meanedLastPos =
+          mean(Lists.newArrayList(braceletPosition,
+              lastPos.getPosition().get(lastPos.getPosition().size() - 1)),
+              new double[]{0.7, 0.3}
+          );
+      /* only retain gps */
+      braceletPosition.setGps(meanedLastPos.getGps());
+    }
+    runAsync(()->{
+      mongo.addBraceletPosition(braceletId, braceletPosition);
+    }).exceptionally(t->{
+      LOG.error("failed to save bracelet {} position {}: ", braceletId, braceletPosition, t);
+      return null;
+    });
+    LOG.info("bracelet {}: BASED ON {} AP(rssi) GOT POS {}", braceletId, positions.size(), braceletPosition);
     braceletPosition.setId(braceletId);
     return braceletPosition;
   }
