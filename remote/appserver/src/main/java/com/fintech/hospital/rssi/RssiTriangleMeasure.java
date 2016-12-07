@@ -60,7 +60,7 @@ public class RssiTriangleMeasure {
       int anotherLineIdx = i - 1 < 0 ? radiuss.size() - 1 : i - 1;
       double ei = radiuss.get(i) - linesLength.get(i),
           eai = radiuss.get(i) - linesLength.get(anotherLineIdx);
-      return (ei < 0 ? 0 : ei) + (eai < 0 ? 0 : eai);
+      return (Math.abs(ei) < tolerance/2 ? 0 : ei) + (Math.abs(eai) < tolerance ? 0 : eai);
     }).toArray();
     /* count errors>0 and find the least */
     int leastIndex = 0, maxIndex = 0, errCount = 0;
@@ -102,7 +102,7 @@ public class RssiTriangleMeasure {
     double maxDiff = Double.MIN_VALUE;
     for (int i = 0; i < diffs.length; i++) {
       double absDiff = Math.abs(diffs[i]);
-      if (maxDiff < absDiff && absDiff > tolerance) {
+      if (maxDiff < absDiff && absDiff > tolerance/3.0) {
         maxDiff = absDiff;
         maxDiffIdx = i;
       }
@@ -132,8 +132,8 @@ public class RssiTriangleMeasure {
     } else {
       double ax = (point.getY() - target.getY()) / (point.getX() - target.getX()),
           c = (point.getX() * target.getY() - target.getX() * point.getY()) / (point.getX() - target.getX()),
-          closer = Math.signum(point.getX() - target.getX()),
-          x = target.getX() + (diff > 0 ? closer : -1 * closer) * (euclidean ? tolerance : (1.0 + Math.random()) * Math.PI * 1e-6 * tolerance);
+          closer = Math.signum(diff) * Math.signum(point.getX() - target.getX()),
+          x = target.getX() + closer * (euclidean ? tolerance/Math.sqrt(1+ax*ax) : (1.0 + Math.random()) * Math.PI * 1e-6 * tolerance);
       return new Vector2D(x, ax * x + c);
     }
   }
@@ -152,6 +152,7 @@ public class RssiTriangleMeasure {
 
   public Vector2D positioning() {
     current = initialPoint();
+    LOG.debug("initial point {}", current);
     while (current != null) {
       double[] diffs = diffs(current);
       current = selectNextPoint(diffs);
