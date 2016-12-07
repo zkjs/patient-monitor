@@ -6,6 +6,7 @@ import com.fintech.hospital.domain.BraceletPosition;
 import com.fintech.hospital.domain.LngLat;
 import com.fintech.hospital.domain.TimedPosition;
 import com.google.common.collect.ImmutableMap;
+import org.apache.commons.math3.geometry.euclidean.oned.Interval;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -40,9 +41,11 @@ public class BraceletTrackRest {
         .collect(groupingBy(timedPosition -> {
           LngLat lnglat = timedPosition.getGps();
           return String.format("%.1f-%.1f", lnglat.getLng(), lnglat.getLat());
-        })).values().stream().map(c -> c.get(0)).collect(Collectors.toList());
+        })).values().stream().map(c -> c.get(0))
+        .sorted((p1,p2)-> Long.compare(p2.getTimestamp(), p1.getTimestamp()))
+        .collect(Collectors.toList());
     return ImmutableMap.of(
-        "list", lastestDiffPosList
+        "list", lastestDiffPosList.subList(0, Math.min(lastestDiffPosList.size(), 20))
     );
   }
 
