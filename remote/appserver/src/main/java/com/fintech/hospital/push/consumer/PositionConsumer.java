@@ -17,12 +17,12 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.fintech.hospital.domain.TimedPosition.mean;
 import static com.fintech.hospital.rssi.RssiMeasure.positionByTriangleGradient;
 import static com.fintech.hospital.rssi.RssiMeasure.positionFromDistribution;
 import static java.util.concurrent.CompletableFuture.runAsync;
-import static java.util.concurrent.CompletableFuture.supplyAsync;
 import static org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE;
 
 /**
@@ -49,26 +49,27 @@ public class PositionConsumer implements PushConsumer {
   @Value("${measure.method.triangle}")
   private boolean USE_TRIANGLE;
 
+  @Value("${measure.triangle.tolerance}")
+  private Double TOLERANCE;
+
   @Value("${socket.io.app.event.position}")
   private String posChannel4App;
 
   @Override
   public void consume(String msg) {
     LOG.debug("consuming ap msg... {}", msg);
+    APMsg apMsg = JSON.parseObject(msg, APMsg.class);
 
-    runAsync(()->{
-      APMsg apMsg = JSON.parseObject(msg, APMsg.class);
-
-      final Bracelet bracelet = mongo.getBracelet(apMsg.getBandId());
-      final String braceletId = bracelet.getId().toHexString();
+    final Bracelet bracelet = mongo.getBracelet(apMsg.getBandId());
+    final String braceletId = bracelet.getId().toHexString();
 
       /* where the ap is located */
-      AP ap = mongo.getAP(apMsg.getApid());
+    AP ap = mongo.getAP(apMsg.getApid());
       /* who is using the bracelet */
-      List<TimedPosition> positions = recordTrace(ap, apMsg.getRssi(), braceletId);
+    List<TimedPosition> positions = recordTrace(ap, apMsg.getRssi(), braceletId);
       /* based on ap signals, try to locate the patient */
-      TimedPosition pos = position(positions, braceletId);
-
+    TimedPosition pos = position(positions, braceletId);
+    runAsync(() -> {
       /* push the position if someone's listening */
       if (pos != null && cache.listening(pos.getId())) {
         JSONObject positionMsg = new JSONObject();
@@ -76,7 +77,7 @@ public class PositionConsumer implements PushConsumer {
         positionMsg.put("position", pos);
         pushService.notifyPosition(new PushMsg(posChannel4App, positionMsg.toJSONString()));
       }
-    }).exceptionally(t ->{
+    }).exceptionally(t -> {
       LOG.error("while consuming {} :", msg, t);
       return null;
     });
@@ -99,12 +100,12 @@ public class PositionConsumer implements PushConsumer {
         braceletPosition = mean(positions, new double[]{1 - distRatio0, distRatio0});
         break;
       default:
-        List<AP> apList = mongo.getAPByNames(mongo.tracedAP(braceletId));
+        List<AP> apList = mongo.getAPByNames(positions.stream().map(TimedPosition::getAp).collect(Collectors.toList()));
         LOG.debug("positions: {}", positions);
         LOG.debug("aps: {}", apList);
         braceletPosition =
             USE_TRIANGLE ?
-                positionByTriangleGradient(positions, apList, USE_EUCLIDEAN) :
+                positionByTriangleGradient(positions, apList, TOLERANCE, USE_EUCLIDEAN) :
                 positionFromDistribution(positions, mongo.getAPByNames(mongo.tracedAP(braceletId)));
         break;
     }

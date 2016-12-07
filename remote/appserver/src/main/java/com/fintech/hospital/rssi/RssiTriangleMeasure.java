@@ -19,15 +19,12 @@ public class RssiTriangleMeasure {
   private List<Double> radiuss = new ArrayList<>();
   private List<Double> linesLength;
   private double tolerance;
-  private double previousDiff;
-  private double previousDeviation;
   private boolean euclidean;
   /* current evaluation */
   private Vector2D current;
   private Vector2D previous;
   private double radius;
   private long iteration = 0;
-  private StandardDeviation standardDeviation = new StandardDeviation();
 
   private Logger LOG = LoggerFactory.getLogger(RssiTriangleMeasure.class);
 
@@ -99,8 +96,7 @@ public class RssiTriangleMeasure {
    * if next point's avg point diff > previousDiffAvg, terminate
    */
   private Vector2D selectNextPoint(double[] diffs) {
-    previousDeviation = standardDeviation.evaluate(diffs);
-    previousDiff = Arrays.stream(diffs).map(Math::abs).sum();
+    double previousDiff = Arrays.stream(diffs).map(Math::abs).sum();
     previous = current;
     int maxDiffIdx = -1;
     double maxDiff = Double.MIN_VALUE;
@@ -115,9 +111,8 @@ public class RssiTriangleMeasure {
     if (maxDiffIdx == -1) return null;
     Vector2D nextPoint = decrGradient(points.get(maxDiffIdx), current, diffs[maxDiffIdx]);
     double[] nextDiffs = diffs(nextPoint);
-    double currentDeviation = standardDeviation.evaluate(nextDiffs),
-        currentDiff = Arrays.stream(nextDiffs).map(Math::abs).sum();
-    if (Math.abs(currentDiff - previousDiff) > 1.2 * tolerance && currentDeviation > previousDeviation)
+    double currentDiff = Arrays.stream(nextDiffs).map(Math::abs).sum();
+    if (Math.abs(currentDiff - previousDiff) > 1.2 * tolerance)
       return null;
     else {
       LOG.debug("error: {} ", Arrays.toString(nextDiffs));
@@ -173,49 +168,5 @@ public class RssiTriangleMeasure {
   public long getIteration() {
     return iteration;
   }
-
-
-//  public static void main(String[] args) {
-//    double c = -0.7801144,
-//    m = 2.3889582,
-//    p = 3.6463172,
-//    T = -62;
-//    int i=0;
-//    long[] time = new long[10000];
-//
-//    while(i<10000) {
-//      long start = System.currentTimeMillis();
-//      RssiDistanceModel model = new RssiDistanceModel(c, m, p, T);
-//      RssiTriangleMeasure measure = new RssiTriangleMeasure(Lists.newArrayList(
-////        new Vector2D(113.943667, 22.529193),//110
-////        new Vector2D(113.94365, 22.529074), //119
-////        new Vector2D(113.943704, 22.529133) //112
-//
-//          new Vector2D(113.943656, 22.52919), //110
-//          new Vector2D(113.943701, 22.52919), //119
-//          new Vector2D(113.943656, 22.529217) //112
-//      ),
-//          Lists.newArrayList(
-//              model.distance(-81), //110
-//              model.distance(-76), //119
-//              model.distance(-78) //112
-//          ),
-//          1,
-//          false
-//      );
-//      measure.positioning();
-//      time[i] = System.currentTimeMillis()-start;
-//      i++;
-//    }
-//
-//    System.out.println(Arrays.stream(time).average().getAsDouble());
-////    System.out.println(RssiMeasure.distance(new Vector2D(113.943656, 22.52919), new Vector2D(113.943701, 22.52919)));
-////    System.out.println(RssiMeasure.distance(new Vector2D(113.943656, 22.529217), new Vector2D(113.943701, 22.52919)));
-////    System.out.println(RssiMeasure.distance(new Vector2D(113.943656, 22.529217), new Vector2D(113.943656, 22.52919)));
-////    System.out.println(model.distance(-72));
-////    System.out.println(model.distance(-71));
-////    System.out.println(measure.positioning());
-////    System.out.println(measure.getRadius());
-//  }
 
 }

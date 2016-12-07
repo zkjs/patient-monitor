@@ -27,7 +27,6 @@ public class TimedPosition {
   @Transient
   private final RssiDistanceModel RSSI_MODEL = new RssiDistanceModel(-2.025513, 3.902773, 1.987332, -59);
 
-
   public TimedPosition() {
   }
 

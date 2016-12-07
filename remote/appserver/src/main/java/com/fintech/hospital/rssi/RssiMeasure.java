@@ -3,21 +3,12 @@ package com.fintech.hospital.rssi;
 import com.alibaba.fastjson.JSON;
 import com.dreizak.miniball.highdim.Miniball;
 import com.fintech.hospital.domain.AP;
-import com.fintech.hospital.domain.LngLat;
 import com.fintech.hospital.domain.TimedPosition;
 import com.google.common.collect.Lists;
-import org.apache.commons.math3.fitting.leastsquares.*;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
-import org.apache.commons.math3.linear.Array2DRowRealMatrix;
-import org.apache.commons.math3.linear.ArrayRealVector;
-import org.apache.commons.math3.linear.RealMatrix;
-import org.apache.commons.math3.linear.RealVector;
-import org.apache.commons.math3.optim.SimpleVectorValueChecker;
-import org.apache.commons.math3.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -38,6 +29,7 @@ public class RssiMeasure {
   public static TimedPosition positionByTriangleGradient(
       List<TimedPosition> positions,
       List<AP> apList,
+      double tolerance,
       boolean euclideanDistance
   ) {
     LOG.trace("triangle in positions: {}", JSON.toJSONString(positions));
@@ -49,7 +41,7 @@ public class RssiMeasure {
         positions.stream()
             .sorted((pos1, pos2) -> pos1.getAp().compareToIgnoreCase(pos2.getAp()))
             .map(TimedPosition::getRadius).collect(Collectors.toList()),
-        2,
+        tolerance,
         euclideanDistance
     );
     Vector2D evaluation = measure.positioning();
@@ -120,112 +112,6 @@ public class RssiMeasure {
     return new double[]{pixelScale, originCoord.getX(), originCoord.getY(), dist};
   }
 
-  public static TimedPosition positioning(List<TimedPosition> positions, String bracelet, TimedPosition lastPos, boolean euclidean) {
-    final List<Vector2D> observes = positions.stream().map(p -> p.getGps().vector()).collect(Collectors.toList());
-
-    MultivariateJacobianFunction distancesToCurrentCenter = point -> {
-      Vector2D center = new Vector2D(point.getEntry(0), point.getEntry(1));
-      RealVector value = new ArrayRealVector(observes.size());
-      RealMatrix jacobian = new Array2DRowRealMatrix(observes.size(), 2);
-      for (int i = 0; i < observes.size(); ++i) {
-        Vector2D o = observes.get(i);
-        double modelI = euclidean ? Vector2D.distance(o, center) : sphereDistance(o, center);
-        value.setEntry(i, modelI);
-        jacobian.setEntry(i, 0, (center.getX() - o.getX()) / modelI);
-        jacobian.setEntry(i, 1, (center.getY() - o.getY()) / modelI);
-      }
-      return new Pair<>(value, jacobian);
-    };
-
-    double[] prescribedDistance = euclidean ?
-        positions.stream().mapToDouble(TimedPosition::getRadius).toArray() :
-        positions.stream().mapToDouble(p -> lnglatDistance(p.getRadius())).toArray();
-
-    double distanceSum = positions.stream().mapToDouble(TimedPosition::getRadius).sum();
-    double ratioSum = positions.stream().mapToDouble(p -> distanceSum - p.getRadius()).sum();
-    double[] ratios = positions.stream().mapToDouble(p -> (distanceSum - p.getRadius()) / ratioSum).toArray();
-    TimedPosition start = lastPos == null ? TimedPosition.mean(positions, ratios) : lastPos;
-
-    LOG.debug("position evaluation starting from {}", start);
-    LOG.debug("targeting {}, ratios: {}", Arrays.toString(prescribedDistance));
-    LeastSquaresProblem problem = new LeastSquaresBuilder()
-        .checkerPair(new SimpleVectorValueChecker(1e-7, 1e-5))
-        .model(distancesToCurrentCenter)
-        .maxEvaluations(100)
-        .maxIterations(50)
-        .target(prescribedDistance)
-        .lazyEvaluation(false)
-        .start(start.getGps().arr())
-        .build();
-    LeastSquaresOptimizer.Optimum optimum = new LevenbergMarquardtOptimizer().optimize(problem);
-    LngLat center = new LngLat(optimum.getPoint().toArray());
-    LOG.debug("{} fitted center: [{}, {}]", bracelet, center.getLng(), center.getLat());
-    LOG.info("{} positioning starting@{}, RMS: {}", bracelet, center, optimum.getRMS());
-    LOG.debug("{} evaluations: {}", bracelet, optimum.getEvaluations());
-    LOG.debug("{} iterations: {}", bracelet, optimum.getIterations());
-    start.setGps(center);
-    return start;
-  }
-
-
-  public static TimedPosition positioningEuc(List<TimedPosition> positions, String bracelet, boolean euclidean) {
-
-    double[] pixelScaleAndOrigin = transform2RelativeCoords(positions);
-
-    double[] prescribedDistance = euclidean ?
-        positions.stream().mapToDouble(TimedPosition::getRadius).toArray() :
-        positions.stream().mapToDouble(p -> lnglatDistance(p.getRadius())).toArray();
-
-    double distanceSum = positions.stream().mapToDouble(TimedPosition::getRadius).sum();
-    double ratioSum = positions.stream().mapToDouble(p -> distanceSum - p.getRadius()).sum();
-    double[] ratios = positions.stream().mapToDouble(p -> (distanceSum - p.getRadius()) / ratioSum).toArray();
-    TimedPosition start = TimedPosition.mean(positions, null);
-
-    LOG.debug("position evaluation starting from {}", start);
-    LOG.debug("targeting {}, ratios: {}", Arrays.toString(prescribedDistance));
-
-
-    final List<Vector2D> observes = positions.stream().map(p -> p.getGps().vector()).collect(Collectors.toList());
-
-    MultivariateJacobianFunction distancesToCurrentCenter = point -> {
-      Vector2D center = new Vector2D(point.getEntry(0), point.getEntry(1));
-      RealVector value = new ArrayRealVector(observes.size());
-      RealMatrix jacobian = new Array2DRowRealMatrix(observes.size(), 2);
-      for (int i = 0; i < observes.size(); ++i) {
-        Vector2D o = observes.get(i);
-        double modelI = euclidean ? Vector2D.distance(o, center) : sphereDistance(o, center);
-        value.setEntry(i, modelI);
-        jacobian.setEntry(i, 0, (center.getX() - o.getX()) / modelI);
-        jacobian.setEntry(i, 1, (center.getY() - o.getY()) / modelI);
-      }
-      return new Pair<>(value, jacobian);
-    };
-
-    LeastSquaresProblem problem = new LeastSquaresBuilder()
-        .checkerPair(new SimpleVectorValueChecker(1e-7, 1e-6))
-        .model(distancesToCurrentCenter)
-        .maxEvaluations(100)
-        .maxIterations(50)
-        .target(prescribedDistance)
-        .lazyEvaluation(false)
-        .start(start.getGps().arr())
-        .build();
-    LeastSquaresOptimizer.Optimum optimum = new LevenbergMarquardtOptimizer().optimize(problem);
-    double[] eval = optimum.getPoint().toArray();
-    LOG.debug("{} fitted center: {} (radius: {})", bracelet, Arrays.toString(eval), start.getRadius());
-    LngLat center = new LngLat(
-        lnglatDistance(pixelScaleAndOrigin[0] / eval[0]) + pixelScaleAndOrigin[1],
-        lnglatDistance(pixelScaleAndOrigin[0] / eval[1]) + pixelScaleAndOrigin[2]
-    );
-    start.setRadius(start.getRadius() * pixelScaleAndOrigin[3] / pixelScaleAndOrigin[0]);
-    start.setGps(center);
-    LOG.debug("{} fitted center: {} (radius: {})", bracelet, Arrays.toString(center.arr()), start.getRadius());
-    LOG.info("{} positioning starting@{}, RMS: {}", bracelet, start.getGps(), optimum.getRMS());
-    LOG.debug("{} evaluations: {}", bracelet, optimum.getEvaluations());
-    LOG.debug("{} iterations: {}", bracelet, optimum.getIterations());
-    return start;
-  }
-
   static double sphereDistance(Vector2D o, Vector2D center) {
     double dlong = (o.getX() - center.getX()) * DEG_2_RAD;
     double dlat = (o.getY() - center.getY()) * DEG_2_RAD;
@@ -266,10 +152,6 @@ public class RssiMeasure {
         pixelScale * sphereDistance(new Vector2D(ap.getLongitude(), 0), new Vector2D(originCoord.getX(), 0)),
         pixelScale * sphereDistance(new Vector2D(0, originCoord.getY()), new Vector2D(0, ap.getLatitude()))
     ));
-  }
-
-  private static double lnglatDistance(double distance) {
-    return distance * 180 / (Math.PI * E_QUATORIAL_EARTH_RADIUS);
   }
 
   private static double euclideanDistance(double lnglatDistance) {
