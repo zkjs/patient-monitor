@@ -3,7 +3,7 @@ package com.fintech.hospital.push.consumer;
 import com.alibaba.fastjson.JSON;
 import com.fintech.hospital.data.MongoDB;
 import com.fintech.hospital.domain.AP;
-import com.fintech.hospital.domain.APMsg;
+import com.fintech.hospital.push.model.APMsg;
 import com.fintech.hospital.domain.Bracelet;
 import com.fintech.hospital.push.PushConsumer;
 import com.fintech.hospital.push.PushService;

@@ -1,14 +1,11 @@
 package com.fintech.hospital.push;
 
 import com.alibaba.fastjson.JSONObject;
-import com.fintech.hospital.domain.AP;
-import com.fintech.hospital.domain.APMsg;
 import com.fintech.hospital.push.model.PushMsg;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 

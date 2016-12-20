@@ -26,16 +26,16 @@
   </Appenders>
 
   <Loggers>
-    <AsyncLogger name="org.springframework" level="trace" additivity="false">
+    <AsyncLogger name="org.springframework" level="info" additivity="false">
       <AppenderRef ref="PTMON"/>
     </AsyncLogger>
-    <AsyncLogger name="org.springframework.web.servlet.mvc.method" level="trace" additivity="false">
+    <AsyncLogger name="org.springframework.web.servlet.mvc.method" level="info" additivity="false">
       <AppenderRef ref="PTMON"/>
     </AsyncLogger>
-    <AsyncLogger name="org.springframework.jdbc.core" level="trace" additivity="false">
+    <AsyncLogger name="org.springframework.jdbc.core" level="info" additivity="false">
       <AppenderRef ref="PTMON"/>
     </AsyncLogger>
-    <AsyncLogger name="com.fintech" level="trace" additivity="false">
+    <AsyncLogger name="com.fintech" level="debug" additivity="false">
       <AppenderRef ref="PTMON"/>
     </AsyncLogger>
     <AsyncLogger name="io.socket" level="debug" additivity="false">

@@ -9,6 +9,19 @@
 
 ## mqtt
 
+- `ap` (heartbeat)
+
+            {
+              "bsid": "ap110",
+              "timestamp": 1478102400,
+              "version": 1.1,
+              "macaddr": "82:e6:50:70:86:00",
+              "temperature": 33.2,
+              "disk": "40%",
+              "mem": "40%",
+              "cpu": "21%"
+            }
+
 - `shot` (publish format)
 
             {

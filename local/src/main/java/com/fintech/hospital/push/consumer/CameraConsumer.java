@@ -5,6 +5,7 @@ import com.fintech.hospital.data.MongoDB;
 import com.fintech.hospital.domain.*;
 import com.fintech.hospital.push.PushConsumer;
 import com.fintech.hospital.push.PushService;
+import com.fintech.hospital.push.model.APMsg;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

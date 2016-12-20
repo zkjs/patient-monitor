@@ -196,4 +196,8 @@ public class MongoDB {
     );
   }
 
+  public void updateAP(APStatus apStatus) {
+    template.updateFirst(new Query(where("name").is(apStatus.getBssid())),
+        new Update().set("current", apStatus), AP.class, DB_AP);
+  }
 }

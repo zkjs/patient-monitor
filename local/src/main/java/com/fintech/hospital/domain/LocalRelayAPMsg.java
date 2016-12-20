@@ -1,6 +1,7 @@
 package com.fintech.hospital.domain;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import com.fintech.hospital.push.model.APMsg;
 
 /**
  * @author baoqiang
