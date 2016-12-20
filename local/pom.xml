@@ -246,6 +246,9 @@
           <include>log4j2.xml</include>
         </includes>
       </resource>
+      <resource>
+        <directory>static</directory>
+      </resource>
     </resources>
 
   </build>

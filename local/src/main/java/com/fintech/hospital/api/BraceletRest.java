@@ -2,6 +2,7 @@ package com.fintech.hospital.api;
 
 import com.fintech.hospital.data.MongoDB;
 import com.fintech.hospital.domain.Bracelet;
+import com.fintech.hospital.domain.BraceletPhoto;
 import com.google.common.collect.ImmutableMap;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,6 +53,14 @@ public class BraceletRest {
     Bracelet let = mongo.unbindBracelet(bracelet);
     if (let == null) return "{'status': 'err', 'error': 'bracelet not found'}";
     return let;
+  }
+
+  @GetMapping("/photos/{bracelet}")
+  public Object photos(
+      @PathVariable("bracelet") String braceletId
+  ){
+    List<BraceletPhoto> photos = mongo.braceletPhotos(braceletId);
+    return ImmutableMap.of("list", photos);
   }
 
 }

@@ -50,7 +50,7 @@ public class CameraConsumer implements PushConsumer {
 
     if (ap.shotEnabled() && SHOT_RANGE >= position.getRadius()) {
       LOG.info("let AP {} take a photo for {} ", ap.getAlias(), apMsg.getBandId());
-      pushService.shot(ap.getAlias(), apMsg.getBandId());
+      pushService.shot(ap.getAlias(), braceletId);
     }
 
   }

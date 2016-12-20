@@ -54,10 +54,11 @@
 
 ## API
 
-- upload AP shot photo [POST /photo/{bracelet}{?ap,time}]
+- upload AP photo shots [POST /photo/{bracelet}{?ap,time}]
 
   - request body
 
+              content-type: image/jpeg
               photo stream
 
   - response body
@@ -65,6 +66,20 @@
               {
                 "status": "ok"
               }
+
+- browse photos [GET /bracelet/photos/{bracelet}]
+
+              {
+                "status": "ok",
+                "data": {
+                  "list": [{
+                    "id": "e23",
+                    "path": "/photos/bracelet/ap/2018-01-01-111111.jpg"
+                    "timestamp": 1478102400
+                  }]
+                }
+              }
+
 
 - map objects [GET /map]
 

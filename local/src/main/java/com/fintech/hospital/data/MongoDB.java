@@ -2,7 +2,6 @@ package com.fintech.hospital.data;
 
 import com.fintech.hospital.domain.*;
 import com.fintech.hospital.domain.MapObj.MapPart;
-import com.mongodb.BasicDBObject;
 import com.mongodb.WriteResult;
 import org.bson.types.ObjectId;
 import org.slf4j.Logger;
@@ -10,23 +9,19 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.aggregation.Aggregation;
-import org.springframework.data.mongodb.core.aggregation.AggregationOperation;
-import org.springframework.data.mongodb.core.aggregation.MatchOperation;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Component;
 
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.springframework.data.domain.Sort.Direction.DESC;
 import static org.springframework.data.mongodb.core.query.Criteria.where;
 
 /**
@@ -40,6 +35,9 @@ public class MongoDB {
   @Autowired
   @Qualifier("mapTemplate")
   private MongoTemplate template;
+
+  @Value("${db.collection.bracelet.photo}")
+  private String DB_BPHOTO;
 
   @Value("${db.collection.ap}")
   private String DB_AP;
@@ -91,7 +89,7 @@ public class MongoDB {
     return let;
   }
 
-  public void braceletDropped(Bracelet bracelet){
+  public void braceletDropped(Bracelet bracelet) {
     WriteResult result = template.updateFirst(
         new Query(where("_id").is(bracelet.getId())),
         new Update().set("status", 2),
@@ -179,16 +177,23 @@ public class MongoDB {
     );
   }
 
-  private final AggregationOperation GROUP_BY_AP = c -> c.getMappedObject(
-      new BasicDBObject("$group", new BasicDBObject("_id", "$ap"))
-  );
-
-
   public void addBraceletTrace(String bracelet, BraceletTrace trace) {
     /* add new trace to bracelet positions */
     trace.setBracelet(bracelet);
     template.insert(trace, DB_BT);
     LOG.info("{} new trace added for {}", trace.getId(), bracelet);
+  }
+
+  public void addBraceletPhoto(BraceletPhoto photo) {
+    template.insert(photo, DB_BPHOTO);
+  }
+
+  public List<BraceletPhoto> braceletPhotos(String braceletId) {
+    return template.find(
+        new Query(where("bracelet").is(new ObjectId(braceletId)))
+            .with(new PageRequest(0, 30, DESC, "_id")),
+        BraceletPhoto.class, DB_BPHOTO
+    );
   }
 
 }
