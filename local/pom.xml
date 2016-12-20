@@ -113,6 +113,11 @@
       <artifactId>commons-io</artifactId>
       <version>${common.io.ver}</version>
     </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-math3</artifactId>
+      <version>${commons.math.ver}</version>
+    </dependency>
 
     <!-- log4j, flume -->
     <dependency>
@@ -168,9 +173,9 @@
           </exclusions>
         </dependency>
         <!--<dependency>-->
-          <!--<groupId>javax.servlet</groupId>-->
-          <!--<artifactId>javax.servlet-api</artifactId>-->
-          <!--<scope>provided</scope>-->
+        <!--<groupId>javax.servlet</groupId>-->
+        <!--<artifactId>javax.servlet-api</artifactId>-->
+        <!--<scope>provided</scope>-->
         <!--</dependency>-->
         <dependency>
           <groupId>org.springframework.boot</groupId>
@@ -213,8 +218,8 @@
           <artifactId>spring-boot-starter-undertow</artifactId>
         </dependency>
         <!--<dependency>-->
-          <!--<groupId>org.springframework.boot</groupId>-->
-          <!--<artifactId>spring-boot-starter-actuator</artifactId>-->
+        <!--<groupId>org.springframework.boot</groupId>-->
+        <!--<artifactId>spring-boot-starter-actuator</artifactId>-->
         <!--</dependency>-->
       </dependencies>
       <build>

@@ -16,7 +16,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 import static com.fintech.hospital.push.model.PushType.BROADCAST;
-import static java.util.concurrent.CompletableFuture.runAsync;
 import static org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE;
 
 /**
@@ -37,9 +36,6 @@ public class APConsumer implements PushConsumer {
   @Value("${mqtt.topic.rescue.app}")
   private String RESCUE_TOPIC;
 
-  @Value("${socket.io.event.position}")
-  private String event;
-
   @Override
   public void consume(String msg) {
     LOG.debug("consuming ap msg... {}", msg);
@@ -50,13 +46,14 @@ public class APConsumer implements PushConsumer {
       final Bracelet bracelet = mongo.getBracelet(apMsg.getBandId());
       if (bracelet == null) {
         LOG.warn("{} not registered yet", apMsg.getBandId());
+        //TODO add new bracelet
         return;
       }
       final String braceletId = bracelet.getId().toHexString();
 
       if (apMsg.dropped()) {
         /* dropped */
-        braceletDropped(bracelet);
+        mongo.braceletDropped(bracelet);
       } else if (apMsg.urgent()) {
         /* emergency */
         AP ap = mongo.getAP(apMsg.getApid());
@@ -67,19 +64,11 @@ public class APConsumer implements PushConsumer {
         apMsg.fillAP(ap);
         notifyEmergency(apMsg, braceletId, bracelet.getPatientName());
       } else {
-        pushService.relay(new PushMsg(event, JSON.toJSONString(apMsg)));
+        pushService.relay(JSON.toJSONString(apMsg));
       }
     } catch (Exception e) {
       LOG.error("while consuming {} : {}", msg, e);
     }
-  }
-
-  private void braceletDropped(Bracelet bracelet) {
-    //TODO update bracelet status
-    runAsync(() -> {
-      bracelet.setStatus(2);
-      //mongo
-    });
   }
 
   private void notifyEmergency(APMsg apMsg, String braceletId, String patient) {

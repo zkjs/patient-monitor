@@ -9,6 +9,13 @@
 
 ## mqtt
 
+- `shot` (publish format)
+
+            {
+              "ap": "ap110",
+              "bracelet": "00"
+            }
+
 - `nursecall` (publish format)
 
             {
@@ -46,6 +53,18 @@
             }
 
 ## API
+
+- upload AP shot photo [POST /photo/{bracelet}{?ap,time}]
+
+  - request body
+
+              photo stream
+
+  - response body
+
+              {
+                "status": "ok"
+              }
 
 - map objects [GET /map]
 

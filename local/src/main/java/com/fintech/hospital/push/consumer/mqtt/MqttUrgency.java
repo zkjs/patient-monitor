@@ -47,10 +47,12 @@ public class MqttUrgency extends MQTTIO {
   @Override
   protected void subscribe(String topic) {
     try {
-      client.subscribe(topic, (t, m) -> {
-        LOG.info("consumer {}: {}", consumer, consumer.toString());
-        consumer.consume(m.toString());
-      });
+      if (client.isConnected()) {
+        client.subscribe(topic, (t, m) -> {
+          LOG.info("consumer {}: {}", consumer, consumer.toString());
+          consumer.consume(m.toString());
+        });
+      } else LOG.warn("client not connected, establish connection before sub on {}", topic);
     } catch (MqttException e) {
       LOG.error("subscription on {} failed: {}", topic, e);
     }

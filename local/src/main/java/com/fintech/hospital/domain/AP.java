@@ -38,6 +38,20 @@ public class AP {
   @Field("create_on")
   private Date create;
 
+  private int enableShot;
+
+  public boolean shotEnabled(){
+    return enableShot==1;
+  }
+
+  public int getEnableShot() {
+    return enableShot;
+  }
+
+  public void setEnableShot(int enableShot) {
+    this.enableShot = enableShot;
+  }
+
   public String getZone() {
     return zone;
   }
@@ -85,6 +99,11 @@ public class AP {
 
   public void setId(ObjectId id) {
     this.id = id;
+  }
+
+
+  public LngLat getGps() {
+    return new LngLat(longitude, latitude);
   }
 
   public void setGps(double longitude, double latitude) {

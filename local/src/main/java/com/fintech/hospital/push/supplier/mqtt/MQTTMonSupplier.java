@@ -23,10 +23,10 @@ public class MQTTMonSupplier extends MQTTIO implements PushSupplier{
     try {
       //TODO options configuration
       client.connect(options);
+      LOG.info("mqtt {} connected", uri);
     } catch (MqttException e) {
       LOG.error("mqtt {} connection failed: {}", uri, e);
     }
-    LOG.info("mqtt {} connected", uri);
   }
 
   @Override

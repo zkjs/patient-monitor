@@ -1,10 +1,9 @@
 package com.fintech.hospital.data;
 
-import com.fintech.hospital.domain.AP;
-import com.fintech.hospital.domain.Bracelet;
-import com.fintech.hospital.domain.MapDrawable;
-import com.fintech.hospital.domain.MapObj;
+import com.fintech.hospital.domain.*;
 import com.fintech.hospital.domain.MapObj.MapPart;
+import com.mongodb.BasicDBObject;
+import com.mongodb.WriteResult;
 import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,10 +12,17 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.aggregation.Aggregation;
+import org.springframework.data.mongodb.core.aggregation.AggregationOperation;
+import org.springframework.data.mongodb.core.aggregation.MatchOperation;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Component;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -37,6 +43,9 @@ public class MongoDB {
 
   @Value("${db.collection.ap}")
   private String DB_AP;
+
+  @Value("${db.collection.bracelet.trace}")
+  private String DB_BT;
 
   @Value("${db.collection.bracelet}")
   private String DB_BRACELET;
@@ -80,6 +89,16 @@ public class MongoDB {
     let.bindPatient(fromPatient);
     template.save(let, DB_BRACELET);
     return let;
+  }
+
+  public void braceletDropped(Bracelet bracelet){
+    WriteResult result = template.updateFirst(
+        new Query(where("_id").is(bracelet.getId())),
+        new Update().set("status", 2),
+        Bracelet.class,
+        DB_BRACELET
+    );
+    LOG.debug("{} bracelet(s) dropped", result.getN());
   }
 
   public Bracelet unbindBracelet(Bracelet bracelet) {
@@ -151,4 +170,25 @@ public class MongoDB {
     return parts;
 
   }
+
+  public List<AP> getAPByNames(List<String> aps) {
+    return template.find(
+        new Query(where("name").in(aps)),
+        AP.class,
+        DB_AP
+    );
+  }
+
+  private final AggregationOperation GROUP_BY_AP = c -> c.getMappedObject(
+      new BasicDBObject("$group", new BasicDBObject("_id", "$ap"))
+  );
+
+
+  public void addBraceletTrace(String bracelet, BraceletTrace trace) {
+    /* add new trace to bracelet positions */
+    trace.setBracelet(bracelet);
+    template.insert(trace, DB_BT);
+    LOG.info("{} new trace added for {}", trace.getId(), bracelet);
+  }
+
 }
