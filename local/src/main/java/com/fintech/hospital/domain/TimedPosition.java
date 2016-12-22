@@ -21,13 +21,13 @@ public class TimedPosition {
 
   @JSONField(serialize = false)
   @Transient
-  private final RssiDistanceModel RSSI_MODEL = new RssiDistanceModel(-0.4105552, 1.2269221, 6.0833473, -57);
+  public static final RssiDistanceModel RSSI_MODEL = new RssiDistanceModel(-0.2105552, 1.2269221, 6.0833473, -57);
 
   public TimedPosition() {
   }
 
   public TimedPosition(AP ap, long timestamp, double rssi) {
-    this.gps = ap.getGps();
+    //this.gps = ap.getGps();
     this.floor = ap.getFloor();
     this.ap = ap.getAlias();
     this.timestamp = timestamp;

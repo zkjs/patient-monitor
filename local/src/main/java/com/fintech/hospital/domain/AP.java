@@ -38,6 +38,7 @@ public class AP {
   @Field("create_on")
   private Date create;
 
+  @Field("camera")
   private int enableShot;
 
   public boolean shotEnabled(){

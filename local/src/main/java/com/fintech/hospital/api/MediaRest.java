@@ -2,6 +2,7 @@ package com.fintech.hospital.api;
 
 import com.fintech.hospital.data.MongoDB;
 import com.fintech.hospital.domain.BraceletPhoto;
+import com.google.common.collect.Lists;
 import com.google.common.io.ByteStreams;
 import org.apache.commons.io.FileUtils;
 import org.bson.types.ObjectId;
@@ -14,7 +15,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.time.DateFormatUtils.format;
 import static org.springframework.http.MediaType.IMAGE_JPEG_VALUE;
@@ -32,20 +35,34 @@ public class MediaRest {
   @Autowired
   private MongoDB mongo;
 
-  @PostMapping(value = "/{braceletId}", consumes = {IMAGE_JPEG_VALUE, IMAGE_PNG_VALUE})
+  @PostMapping(value = "/{apId}", consumes = {IMAGE_JPEG_VALUE, IMAGE_PNG_VALUE})
   public Object uploadPic(
-      HttpServletRequest req, @PathVariable String braceletId,
-      @RequestParam("ap") String apId, @RequestParam("time") long time
+      HttpServletRequest req, @PathVariable String apId,
+      @RequestParam(name = "bracelets") String[] bracelets, @RequestParam("time") long time
   ) {
     byte[] buffer = parseInput(req);
+    if((""+time).length()==10) time *= 1000;
     Date shotTime = new Date(time);
     try {
       String filename = String.format("static/photos/%s/%s/%s.jpg",
-          braceletId, apId, format(shotTime, "yyyy-MM-dd-HHmmss"));
+          Arrays.stream(bracelets).sorted().collect(Collectors.joining(",")),
+          apId, format(shotTime, "yyyy-MM-dd-HHmmss"));
+      //TODO file writing list
       FileUtils.writeByteArrayToFile(new File(filename), buffer);
-      mongo.addBraceletPhoto(new BraceletPhoto(braceletId, filename.replace("static/", ""), time));
+      LOG.info("ap {} just took photo of {} bracelets", apId, bracelets.length);
+      String dbfilename = filename.replace("static/", "");
+      if(bracelets.length==1){
+        mongo.addBraceletPhoto(new BraceletPhoto(bracelets[0], dbfilename, time));
+      }else {
+        final long photoTime = time;
+        mongo.addBraceletPhotos(
+            Arrays.stream(bracelets).map(
+                b-> new BraceletPhoto(b, dbfilename, photoTime)
+            ).collect(Collectors.toList())
+        );
+      }
     } catch (IOException ioe) {
-      LOG.error("failed to save photo of {} shot by {} @{}", braceletId, apId, shotTime);
+      LOG.error("failed to save photo of {} shot by {} @{}", bracelets, apId, shotTime);
     }
     return new Object();
   }

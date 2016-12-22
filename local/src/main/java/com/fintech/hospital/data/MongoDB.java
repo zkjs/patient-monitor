@@ -188,6 +188,10 @@ public class MongoDB {
     template.insert(photo, DB_BPHOTO);
   }
 
+  public void addBraceletPhotos(List<BraceletPhoto> photos) {
+    template.insert(photos, DB_BPHOTO);
+  }
+
   public List<BraceletPhoto> braceletPhotos(String braceletId) {
     return template.find(
         new Query(where("bracelet").is(new ObjectId(braceletId)))

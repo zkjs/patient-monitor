@@ -10,10 +10,12 @@ import org.springframework.boot.autoconfigure.web.HttpMessageConverters;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.support.SpringBootServletInitializer;
 import org.springframework.context.annotation.Bean;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 import static com.alibaba.fastjson.serializer.SerializerFeature.*;
 
 @SpringBootApplication
+@EnableScheduling
 public class Application extends SpringBootServletInitializer {
 
   static final Logger LOG = LoggerFactory.getLogger(Application.class);

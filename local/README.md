@@ -9,7 +9,7 @@
 
 ## mqtt
 
-- `ap` (heartbeat)
+- `apstat` (heartbeat)
 
             {
               "bsid": "ap110",
@@ -22,11 +22,12 @@
               "cpu": "21%"
             }
 
-- `shot` (publish format)
+- `ap` (publish format)
 
             {
               "ap": "ap110",
-              "bracelet": "00"
+              "bracelet": "00",
+              "cmd":
             }
 
 - `nursecall` (publish format)
@@ -67,7 +68,7 @@
 
 ## API
 
-- upload AP photo shots [POST /photo/{bracelet}{?ap,time}]
+- upload AP photo shots [POST /photo/{ap}{?bracelets,time}]
 
   - request body
 

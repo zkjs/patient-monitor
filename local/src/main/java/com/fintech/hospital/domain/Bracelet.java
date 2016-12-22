@@ -32,6 +32,18 @@ public class Bracelet {
   @JSONField(serialize = false)
   private Integer status;
 
+  @JSONField(name = "attached")
+  public Integer attached(){
+    switch (status){
+      case 2:
+        return 0;
+      case 1:
+        return 1;
+      default:
+        return null;
+    }
+  }
+
   @Transient
   private String type;
 

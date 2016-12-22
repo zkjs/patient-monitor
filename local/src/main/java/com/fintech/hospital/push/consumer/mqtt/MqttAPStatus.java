@@ -27,8 +27,8 @@ public class MqttAPStatus extends MQTTIO {
     LOG.info("mqtt {} connected", uri);
   }
 
-  @Value("${mqtt.topic.status.ap}")
-  private String AP_STATUS;
+  @Value("${mqtt.topic.ap.status}")
+  private String AP;
 
   @Autowired
   @Qualifier("APStatConsumer")
@@ -37,7 +37,7 @@ public class MqttAPStatus extends MQTTIO {
   @PostConstruct
   @Override
   protected void init() {
-    subscribe(AP_STATUS);
+    subscribe(AP);
   }
 
   @Override

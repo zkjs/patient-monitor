@@ -1,10 +1,12 @@
 package com.fintech.hospital.push.consumer;
 
 import com.alibaba.fastjson.JSON;
+import com.fintech.hospital.data.Cache;
 import com.fintech.hospital.data.MongoDB;
-import com.fintech.hospital.domain.*;
+import com.fintech.hospital.domain.AP;
+import com.fintech.hospital.domain.Bracelet;
+import com.fintech.hospital.domain.BraceletTrace;
 import com.fintech.hospital.push.PushConsumer;
-import com.fintech.hospital.push.PushService;
 import com.fintech.hospital.push.model.APMsg;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +15,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import static com.fintech.hospital.domain.TimedPosition.RSSI_MODEL;
 import static java.util.concurrent.CompletableFuture.runAsync;
 import static org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE;
 
@@ -26,10 +29,10 @@ public class CameraConsumer implements PushConsumer {
   private final Logger LOG = LoggerFactory.getLogger(this.getClass());
 
   @Autowired
-  private PushService pushService;
+  private MongoDB mongo;
 
   @Autowired
-  private MongoDB mongo;
+  private Cache cache;
 
   @Value("${distance.range.shot}")
   private Double SHOT_RANGE;
@@ -40,29 +43,39 @@ public class CameraConsumer implements PushConsumer {
 
     /* who is using the bracelet */
     final Bracelet bracelet = mongo.getBracelet(apMsg.getBandId());
+
+    if (bracelet == null) {
+      LOG.warn("bracelet {} not found", apMsg.getBandId());
+      return;
+    }
+
     final String braceletId = bracelet.getId().toHexString();
 
     /* where the ap is located */
     AP ap = mongo.getAP(apMsg.getApid());
 
-    TimedPosition position = recordTrace(ap, apMsg.getRssi(), braceletId);
+    if (ap == null) {
+      LOG.warn("ap {} not found", apMsg.getApid());
+      return;
+    }
 
-    /* based on ap signals, try to locate and take a photo of the patient */
+    double distance = recordTrace(ap, apMsg.getRssi(), braceletId);
 
-    if (ap.shotEnabled() && SHOT_RANGE >= position.getRadius()) {
-      LOG.info("let AP {} take a photo for {} ", ap.getAlias(), apMsg.getBandId());
-      pushService.shot(ap.getAlias(), braceletId);
+    if (ap.shotEnabled() || SHOT_RANGE >= distance) {
+      LOG.debug("{} distance: {}, ready to roll", apMsg.getBandId(), distance);
+      /* based on ap signals, try to locate and take a photo of the patient */
+      cache.push(apMsg.getApid(), braceletId, System.currentTimeMillis());
     }
 
   }
 
-  private TimedPosition recordTrace(AP ap, int rssi, String braceletId) {
+  private double recordTrace(AP ap, int rssi, String braceletId) {
     runAsync(() -> mongo.addBraceletTrace(
         braceletId,
         new BraceletTrace(ap.getAlias(), rssi)
     ));
       /* pop all latest positions */
-    return new TimedPosition(ap, System.currentTimeMillis(), rssi);
+    return RSSI_MODEL.distance(rssi);
   }
 
 }
