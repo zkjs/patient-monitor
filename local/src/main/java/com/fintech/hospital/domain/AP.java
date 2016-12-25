@@ -6,6 +6,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author baoqiang
@@ -13,13 +14,24 @@ import java.util.Date;
 public class AP {
 
   @Override
+  public boolean equals(Object ap) {
+    return ap == this || ap instanceof AP && ((AP) ap).getId().equals(this.getId());
+  }
+
+  @Override
   public String toString(){
     return alias;
   }
 
-  @JSONField(serialize = false)
+  @JSONField(name = "apid", deserialize = false)
   @Id
   private ObjectId id;
+
+
+  @JSONField(name = "apid", serialize = false)
+  public void setId(String id) {
+    this.id = new ObjectId(id);
+  }
 
   @JSONField(serialize = false)
   private Double longitude;
@@ -37,20 +49,49 @@ public class AP {
   @JSONField(serialize = false)
   @Field("create_on")
   private Date create;
+  private Date update;
 
-  @Field("camera")
-  private int enableShot;
+  private List<String> triggers;
+  @Field("trigger_logic")
+  private String triggerLogic;
 
+  private int camera;
+
+  public String getTriggerLogic() {
+    return triggerLogic;
+  }
+
+  public void setTriggerLogic(String triggerLogic) {
+    this.triggerLogic = triggerLogic;
+  }
+
+  public Date getUpdate() {
+    return update;
+  }
+
+  public void setUpdate(Date update) {
+    this.update = update;
+  }
+
+  public List<String> getTriggers() {
+    return triggers;
+  }
+
+  public void setTriggers(List<String> triggers) {
+    this.triggers = triggers;
+  }
+
+  @JSONField(serialize = false)
   public boolean shotEnabled(){
-    return enableShot==1;
+    return camera ==1;
   }
 
-  public int getEnableShot() {
-    return enableShot;
+  public int getCamera() {
+    return camera;
   }
 
-  public void setEnableShot(int enableShot) {
-    this.enableShot = enableShot;
+  public void setCamera(int camera) {
+    this.camera = camera;
   }
 
   public String getZone() {
@@ -85,7 +126,6 @@ public class AP {
     return status;
   }
 
-
   public String getAlias() {
     return alias;
   }
@@ -102,11 +142,12 @@ public class AP {
     this.id = id;
   }
 
-
+  @JSONField(serialize = false)
   public LngLat getGps() {
     return new LngLat(longitude, latitude);
   }
 
+  @JSONField(deserialize = false)
   public void setGps(double longitude, double latitude) {
     this.longitude = longitude;
     this.latitude = latitude;
@@ -134,5 +175,10 @@ public class AP {
 
   public void setLatitude(Double latitude) {
     this.latitude = latitude;
+  }
+
+  @JSONField(serialize = false)
+  public boolean reqValid() {
+    return !(camera==0&&!triggers.isEmpty());
   }
 }

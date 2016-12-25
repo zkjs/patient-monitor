@@ -29,7 +29,7 @@ public class APStatusConsumer implements PushConsumer {
     LOG.debug("consuming ap heartbeat... {}", msg);
     APStatus apStatus = JSON.parseObject(msg, APStatus.class);
     LOG.info("ap {} alive", apStatus.getBssid());
-    mongo.updateAP(apStatus);
+    mongo.updateAPStatus(apStatus);
   }
 
 }

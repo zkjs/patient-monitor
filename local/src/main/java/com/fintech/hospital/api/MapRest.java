@@ -34,7 +34,7 @@ public class MapRest {
       @PathVariable String part
   ){
     if(isBlank(part) || part.length() != 24)
-      return "{'status': 'err', 'error': 'object not found'}";
+      return "{\"status\": \"err\", \"error\": \"object not found\"}";
 
     return ImmutableMap.of(
        "list",  mongo.mapParts(part)

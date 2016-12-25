@@ -17,6 +17,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Component;
 
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -200,8 +201,43 @@ public class MongoDB {
     );
   }
 
-  public void updateAP(APStatus apStatus) {
+  public void updateAPStatus(APStatus apStatus) {
     template.updateFirst(new Query(where("name").is(apStatus.getBssid())),
         new Update().set("current", apStatus), AP.class, DB_AP);
+  }
+
+  public List<AP> apList() {
+    return template.find(
+        new Query(where("status").is(1)),
+        AP.class,
+        DB_AP
+    );
+  }
+
+  public boolean updateAP(AP ap) {
+    Update update = new Update()
+        .set("triggers", ap.getTriggers())
+        .set("camera", ap.getCamera())
+        .set("update", new Date());
+    if (ap.shotEnabled()) {
+      update.set("triggerLogic", ap.getTriggerLogic());
+    } else {
+      update.unset("triggerLogic");
+    }
+    WriteResult result = template.updateFirst(
+        new Query(where("_id").is(ap.getId())),
+        update,
+        AP.class,
+        DB_AP
+    );
+    return result.getN() == 1;
+  }
+
+  List<AP> getAPCameras() {
+    return template.find(
+        new Query(where("camera").is(1)),
+        AP.class,
+        DB_AP
+    );
   }
 }

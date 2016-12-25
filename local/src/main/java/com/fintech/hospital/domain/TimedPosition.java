@@ -47,6 +47,7 @@ public class TimedPosition {
    * search radius centering@gps
    */
   private Double radius;
+
   private LngLat gps;
   private Integer floor;
   private String ap;

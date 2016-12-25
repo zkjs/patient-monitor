@@ -68,6 +68,52 @@
 
 ## API
 
+- ap list [GET /ap]
+
+              {
+                status: "ok",
+                data: {
+                  "list":[{
+                    "apid": "581b1a6542aa101eebc77e63",
+                    "alias": "3001",
+                    "address": "left corner",
+                    "floor": 2,
+                    "triggers": ["A", "B"],
+                    "triggerLogic": "and",
+                    "camera": 1,
+                    "update": "2016-12-31 00:00:00"
+                  },{
+                    "apid": "581b1a6542aa101eebc77e61",
+                    "alias": "3002",
+                    "address": "right corner",
+                    "floor": 2,
+                    "camera": 0,
+                    "update": "2016-12-31 00:00:00"
+                  }]
+                }
+              }
+
+- update ap attributes [PUT /ap]
+
+  - request body (ap with triggers must be a camera)
+
+              {
+                "apid": "581b1a6542aa101eebc77e63",
+                "triggers: [],
+                "triggerLogic": "and",
+                "camera": 1
+              }
+
+  - response body
+
+              {
+                "status": "ok"
+              }
+
+- add ap (TODO)
+
+- delete ap (TODO)
+
 - upload AP photo shots [POST /photo/{ap}{?bracelets,time}]
 
   - request body

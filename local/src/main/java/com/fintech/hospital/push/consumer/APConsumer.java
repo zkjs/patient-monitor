@@ -56,9 +56,9 @@ public class APConsumer implements PushConsumer {
         mongo.braceletDropped(bracelet);
       } else if (apMsg.urgent()) {
         /* emergency */
-        AP ap = mongo.getAP(apMsg.getApid());
+        AP ap = mongo.getAP(apMsg.getApAlias());
         if (ap == null) {
-          LOG.warn("ap {} not found in db, check ap local configuration", apMsg.getApid());
+          LOG.warn("ap {} not found in db, check ap local configuration", apMsg.getApAlias());
           return;
         }
         apMsg.fillAP(ap);
@@ -73,7 +73,7 @@ public class APConsumer implements PushConsumer {
 
   private void notifyEmergency(APMsg apMsg, String braceletId, String patient) {
     /* categorize msg type: urgency (push to mon immediately for alert), tracing */
-    LOG.info("bracelet {}(BLE-ID) in emergency, detected by ap {}", apMsg.getBandId(), apMsg.getApid());
+    LOG.info("bracelet {}(BLE-ID) in emergency, detected by ap {}", apMsg.getBandId(), apMsg.getApAlias());
     apMsg.setBracelet(braceletId);
     String alertMsg = String.format("%s (%s) 求救 ", patient, apMsg.getBandId());
     apMsg.setMessage(alertMsg);

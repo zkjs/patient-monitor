@@ -9,7 +9,7 @@ import com.fintech.hospital.domain.AP;
 public class APMsg {
 
   @JSONField(name = "bsid")
-  private String apid;
+  private String apAlias;
   @JSONField(name = "data")
   private String payload;
   private Integer rssi;
@@ -89,12 +89,12 @@ public class APMsg {
 
   private byte pkg;
 
-  public String getApid() {
-    return apid;
+  public String getApAlias() {
+    return apAlias;
   }
 
-  public void setApid(String apid) {
-    this.apid = apid;
+  public void setApAlias(String apAlias) {
+    this.apAlias = apAlias;
   }
 
   public String getPayload() {
