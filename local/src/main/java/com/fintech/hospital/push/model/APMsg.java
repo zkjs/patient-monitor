@@ -19,6 +19,9 @@ public class APMsg {
   @JSONField(serialize = false)
   private Long timestamp;
 
+  @JSONField(name = "addr")
+  private String braceletMac;
+
   private String alert;
   private String address;
   private Integer floor;
@@ -29,6 +32,14 @@ public class APMsg {
   public void fillAP(AP ap) {
     this.address = ap.getAddress();
     this.floor = ap.getFloor();
+  }
+
+  public String getBraceletMac() {
+    return braceletMac;
+  }
+
+  public void setBraceletMac(String braceletMac) {
+    this.braceletMac = braceletMac;
   }
 
   public String getBandId() {

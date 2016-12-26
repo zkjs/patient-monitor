@@ -1,5 +1,6 @@
 package com.fintech.hospital.data;
 
+import com.alibaba.fastjson.JSON;
 import com.fintech.hospital.domain.AP;
 import com.fintech.hospital.push.PushService;
 import org.apache.commons.lang3.StringUtils;
@@ -12,6 +13,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -53,12 +55,18 @@ public class Cache {
         c -> c.getTriggers() != null && !c.getTriggers().isEmpty()
     ).forEach(c -> {
       c.getTriggers().forEach(t -> {
-        Set<AP> aps = new HashSet<>(1);
-        aps.add(c);
-        aps = TRIGGERS.putIfAbsent(t, aps);
-        if (aps != null) TRIGGERS.get(t).add(c);
+        TRIGGERS.computeIfAbsent(t, k->{
+          Set<AP> aps = new HashSet<>(1);
+          aps.add(c);
+          return aps;
+        });
+        TRIGGERS.computeIfPresent(t, (k,v)->{
+          v.add(c);
+          return v;
+        });
       });
     });
+    LOG.trace("camera triggers cache built: {}", JSON.toJSONString(TRIGGERS));
   }
 
   /**
@@ -97,41 +105,48 @@ public class Cache {
     }
   }
 
-  public void push(String apAlias, String bracelet, long time) {
-    if (TRIGGERS.containsKey(apAlias)) {
+  public void push(String apid, String bracelet, long time) {
+    if (TRIGGERS.containsKey(apid)) {
       /* current ap is a trigger */
-      Set<AP> targetAPs = TRIGGERS.get(apAlias);
+      Set<AP> targetAPs = TRIGGERS.get(apid);
       targetAPs.forEach(targetAP -> {
         final String logic = targetAP.getTriggerLogic();
-        if ("OR".equalsIgnoreCase(logic)) {
+        if (targetAP.getTriggers().size()==1 || "OR".equalsIgnoreCase(logic)) {
 
+          LOG.debug("[OR] updating shot cache: {}-{}@{}", targetAP.getAlias(), bracelet, new Date(time));
           /* or logic triggers a camera shot instantly */
-          updateCache(apAlias, bracelet, time);
+          updateCache(targetAP.getAlias(), bracelet, time);
 
         } else if ("AND".equalsIgnoreCase(logic)) {
 
           /* and logic waits for all triggers to be pulled before firing a shot */
-          final String standbyKey = apAlias + "-" + bracelet;
+          final String standbyKey = targetAP.getId().toHexString() + "-" + bracelet;
           AP_STANDBYS.computeIfPresent(standbyKey, (k, v) -> {
+            /* already an ap-bracelet pair standby, waiting for another trigger */
+            LOG.trace("{} already standby, waiting for another trigger ", k);
             if (expired(v.getKey())) {
+              LOG.trace("{} standby expired, removed", k);
               /* remove expired standbys */
               AP_STANDBYS.remove(standbyKey);
               return null;
             } else {
-              v.getValue().remove(apAlias);
+              v.getValue().remove(apid);
+              LOG.trace("{} standing-by triggered, {} left: {}", k, v.getValue().size(), v.getValue());
               return v;
             }
           });
           Pair<Long, Set<String>> standByTriggers = AP_STANDBYS.computeIfAbsent(standbyKey,
               alias -> {
+                LOG.trace("not triggered yet, {} standing by", alias);
                 Set<String> triggers = new HashSet<>();
                 triggers.addAll(targetAP.getTriggers());
-                triggers.remove(apAlias);
+                triggers.remove(apid);
                 return new Pair<>(time, triggers);
               }
           );
           if (standByTriggers != null && standByTriggers.getValue().isEmpty()) {
-            updateCache(apAlias, bracelet, time);
+            LOG.debug("[AND] updating shot cache: {}-{}@{}", targetAP.getAlias(), bracelet, new Date(time));
+            updateCache(targetAP.getAlias(), bracelet, time);
           }
 
         }

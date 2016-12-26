@@ -14,8 +14,13 @@ import java.util.List;
 public class AP {
 
   @Override
+  public int hashCode(){
+    return this.getId().hashCode();
+  }
+
+  @Override
   public boolean equals(Object ap) {
-    return ap == this || ap instanceof AP && ((AP) ap).getId().equals(this.getId());
+    return ap == this || ap instanceof AP && ((AP) ap).getId().toHexString().equals(this.getId().toHexString());
   }
 
   @Override
@@ -23,12 +28,16 @@ public class AP {
     return alias;
   }
 
-  @JSONField(name = "apid", deserialize = false)
+  @JSONField(serialize = false, deserialize = false)
   @Id
   private ObjectId id;
 
+  @JSONField(name = "apid")
+  public String getIdString(){
+    return this.id.toHexString();
+  }
 
-  @JSONField(name = "apid", serialize = false)
+  @JSONField(name = "apid")
   public void setId(String id) {
     this.id = new ObjectId(id);
   }
@@ -138,6 +147,7 @@ public class AP {
     return id;
   }
 
+  @JSONField(deserialize = false)
   public void setId(ObjectId id) {
     this.id = id;
   }

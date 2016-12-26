@@ -16,6 +16,8 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 import static com.fintech.hospital.push.model.PushType.BROADCAST;
+import static java.util.concurrent.CompletableFuture.runAsync;
+import static java.util.concurrent.CompletableFuture.supplyAsync;
 import static org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE;
 
 /**
@@ -40,13 +42,13 @@ public class APConsumer implements PushConsumer {
   public void consume(String msg) {
     LOG.debug("consuming ap msg... {}", msg);
 
-    try {
-      APMsg apMsg = JSON.parseObject(msg, APMsg.class);
+    runAsync(()->{
 
+      APMsg apMsg = JSON.parseObject(msg, APMsg.class);
       final Bracelet bracelet = mongo.getBracelet(apMsg.getBandId());
       if (bracelet == null) {
         LOG.warn("{} not registered yet", apMsg.getBandId());
-        //TODO add new bracelet
+        mongo.addUntrackedBraclet(apMsg.getBandId(), apMsg.getBraceletMac());
         return;
       }
       final String braceletId = bracelet.getId().toHexString();
@@ -66,9 +68,11 @@ public class APConsumer implements PushConsumer {
       } else {
         pushService.relay(JSON.toJSONString(apMsg));
       }
-    } catch (Exception e) {
-      LOG.error("while consuming {} : {}", msg, e);
-    }
+
+    }).exceptionally(t -> {
+      LOG.error("while consuming {} : {}", msg, t);
+      return null;
+    });
   }
 
   private void notifyEmergency(APMsg apMsg, String braceletId, String patient) {

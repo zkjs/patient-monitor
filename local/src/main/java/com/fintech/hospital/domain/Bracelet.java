@@ -13,6 +13,11 @@ import javax.validation.constraints.*;
  */
 public class Bracelet {
 
+  public Bracelet(){}
+
+  public Bracelet(String name, String mac){
+  }
+
   @JSONField(name = "bracelet", serialize = false)
   public void setBracelet(String bracelet) {
     this.id = new ObjectId(bracelet);

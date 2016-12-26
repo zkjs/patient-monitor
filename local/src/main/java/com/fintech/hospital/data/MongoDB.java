@@ -240,4 +240,10 @@ public class MongoDB {
         DB_AP
     );
   }
+
+  public void addUntrackedBraclet(String bandId, String mac) {
+    Bracelet bracelet = new Bracelet(bandId, mac);
+    template.insert(bracelet, DB_BRACELET);
+  }
+
 }
