@@ -27,6 +27,7 @@
     <common.lang.ver>3.4</common.lang.ver>
     <common.io.ver>2.4</common.io.ver>
     <apache.http.ver>4.5</apache.http.ver>
+    <jmdns.ver>3.5.1</jmdns.ver>
 
   </properties>
 
@@ -145,6 +146,12 @@
       <groupId>com.lmax</groupId>
       <artifactId>disruptor</artifactId>
       <version>${disruptor.ver}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jmdns</groupId>
+      <artifactId>jmdns</artifactId>
+      <version>${jmdns.ver}</version>
     </dependency>
 
 
