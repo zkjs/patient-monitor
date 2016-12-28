@@ -27,9 +27,13 @@ public class APStatusConsumer implements PushConsumer {
   @Override
   public void consume(String msg) {
     LOG.debug("consuming ap heartbeat... {}", msg);
-    APStatus apStatus = JSON.parseObject(msg, APStatus.class);
-    LOG.info("ap {} alive", apStatus.getBssid());
-    mongo.updateAPStatus(apStatus);
+    try {
+      APStatus apStatus = JSON.parseObject(msg, APStatus.class);
+      LOG.info("ap {} alive", apStatus.getBsid());
+      mongo.updateAPStatus(apStatus);
+    }catch (Exception e){
+      LOG.warn("failed consuming heartbeat msg from {}: ", msg, e);
+    }
   }
 
 }

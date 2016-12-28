@@ -1,5 +1,6 @@
 package com.fintech.hospital.push.mqtt;
 
+import com.alibaba.fastjson.JSON;
 import org.bson.types.ObjectId;
 import org.eclipse.paho.client.mqttv3.*;
 import org.slf4j.Logger;
@@ -74,7 +75,7 @@ public abstract class MQTTIO implements MqttCallback{
 
   @Override
   public void deliveryComplete(IMqttDeliveryToken token) {
-    LOG.trace("mqtt msg deliverred {}", token);
+    LOG.trace("mqtt msg deliverred {}", token.getMessageId());
   }
 
 

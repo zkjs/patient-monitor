@@ -68,7 +68,7 @@
 
 ## API
 
-- ap list [GET /ap]
+- ap list [GET /ap] (working: 0-unknown, 1-normal, -1-disappeared)
 
               {
                 status: "ok",
@@ -81,6 +81,34 @@
                     "triggers": ["A", "B"],
                     "triggerLogic": "and",
                     "camera": 1,
+                    "working": 1,
+                    "stat": {
+                      "DiskInfo": {
+                        "DiskTotal": "7.2GB",
+                        "DiskUsed": "3.7GB",
+                        "DiskUsedPerc": "51%"
+                      },
+                      "bsid": "pinky",
+                      "cpu_load": "1.6 %",
+                      "features": [
+                        "camera"
+                      ],
+                      "ip": "10.8.47.20",
+                      "mac": "b8:27:eb:2e:72:1a",
+                      "os_uptime": "460.3 min",
+                      "ram": {
+                        "free": "236.0 MB",
+                        "total": "976.0 MB",
+                        "used": "738.0 MB",
+                        "used_perc": "75.6 %"
+                      },
+                      "script_uptime": "0.9 mins",
+                      "temp": {
+                        "cpu": "51.0"
+                      },
+                      "timestamp": 1482917225,
+                      "version": 1
+                    },
                     "update": "2016-12-31 00:00:00"
                   },{
                     "apid": "581b1a6542aa101eebc77e61",
@@ -88,6 +116,7 @@
                     "address": "right corner",
                     "floor": 2,
                     "camera": 0,
+                    "working": 1,
                     "update": "2016-12-31 00:00:00"
                   }]
                 }

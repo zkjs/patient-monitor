@@ -54,6 +54,7 @@ public class Cache {
     cameras.stream().filter(
         c -> c.getTriggers() != null && !c.getTriggers().isEmpty()
     ).forEach(c -> {
+      c.setStat(null);
       c.getTriggers().forEach(t -> {
         TRIGGERS.computeIfAbsent(t, k->{
           Set<AP> aps = new HashSet<>(1);

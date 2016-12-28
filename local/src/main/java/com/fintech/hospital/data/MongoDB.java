@@ -201,9 +201,29 @@ public class MongoDB {
     );
   }
 
+  /**
+   * update the ap's latest status and register ap if previously not included in db
+   */
   public void updateAPStatus(APStatus apStatus) {
-    template.updateFirst(new Query(where("name").is(apStatus.getBssid())),
-        new Update().set("current", apStatus), AP.class, DB_AP);
+    if(apStatus==null) return;
+
+    Update update = new Update()
+        .set("stat", apStatus)
+        .set("mac", apStatus.getMac())
+        .set("update_on", new Date());
+    if(apStatus.getFeatures().contains("camera")){
+      update.set("camera", 1);
+    }
+
+    WriteResult result = template.upsert(
+        new Query(where("name").is(apStatus.getBsid())),
+        update, AP.class, DB_AP
+    );
+
+    if(!result.isUpdateOfExisting()){
+      LOG.info("new ap {} registered {}", apStatus.getBsid(), result.getUpsertedId());
+    }
+
   }
 
   public List<AP> apList() {

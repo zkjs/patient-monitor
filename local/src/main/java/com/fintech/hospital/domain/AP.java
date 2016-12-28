@@ -53,8 +53,9 @@ public class AP {
   private Integer floor;
   @Field("name")
   private String alias;
-  @JSONField(serialize = false)
-  private Integer status;
+
+  private APStatus stat;
+
   @JSONField(serialize = false)
   @Field("create_on")
   private Date create;
@@ -127,12 +128,22 @@ public class AP {
     this.address = address;
   }
 
-  public void setStatus(Integer status) {
-    this.status = status;
+  @JSONField(name = "working")
+  public int runningStatus(){
+    if(this.stat!=null){
+      long time = this.stat.getTimestamp();
+      if(time/1e10<1) time *= 1000;
+      return System.currentTimeMillis()-time > 5*60*1000 ? -1 : 1;
+    }
+    return 0;
   }
 
-  public Integer getStatus() {
-    return status;
+  public APStatus getStat() {
+    return stat;
+  }
+
+  public void setStat(APStatus stat) {
+    this.stat = stat;
   }
 
   public String getAlias() {
