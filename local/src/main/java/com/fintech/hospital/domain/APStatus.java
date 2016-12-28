@@ -158,38 +158,4 @@ public class APStatus {
     this.temp = temp;
   }
 
-  public static void main(String[] args) {
-   String s = "{\n" +
-       "    \"os_uptime\":\"1745.9 min\",\n" +
-       "    \"DiskInfo\":{\n" +
-       "        \"DiskUsed\":\"3.7GB\",\n" +
-       "        \"DiskUsedPerc\":\"51%\",\n" +
-       "        \"DiskTotal\":\"7.2GB\"\n" +
-       "    },\n" +
-       "    \"bsid\":\"pinky\",\n" +
-       "    \"features\":[\n" +
-       "        \"camera\"\n" +
-       "    ],\n" +
-       "    \"temp\":{\n" +
-       "        \"gpu\":\"52.6\",\n" +
-       "        \"cpu\":\"52.6\"\n" +
-       "    },\n" +
-       "    \"ip\":\"127.0.0.1\",\n" +
-       "    \"ram\":{\n" +
-       "        \"buffcache\":\"608.0 MB\",\n" +
-       "        \"total\":\"883.0 MB\",\n" +
-       "        \"free\":\"44.0 MB\",\n" +
-       "        \"used\":\"838.0 MB\",\n" +
-       "        \"used_perc\":\"94.9 %\"\n" +
-       "    },\n" +
-       "    \"mac\":\"b8:27:eb:2e:72:1a\",\n" +
-       "    \"version\":1.1,\n" +
-       "    \"cpu_load\":\"0.3 %\",\n" +
-       "    \"timestamp\":1482831620,\n" +
-       "    \"script_uptime\":\"0.6 mins\"\n" +
-       "}";
-
-    System.out.println(JSON.toJSONString(JSON.parseObject(s, APStatus.class)));
-  }
-
 }

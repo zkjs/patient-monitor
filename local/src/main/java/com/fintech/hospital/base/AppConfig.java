@@ -63,7 +63,7 @@ public class AppConfig {
   /**
    * suppose that the mqtt server is on the same machine
    */
-//  @PostConstruct
+  @PostConstruct
   private void multicastMqttServerAddr() {
     try {
       jmDNS = JmDNS.create(InetAddress.getLocalHost());
@@ -77,7 +77,7 @@ public class AppConfig {
     }
   }
 
-//  @PreDestroy
+  @PreDestroy
   private void unregistermDNSSvrs() {
     LOG.trace("trying to unregister mdns services");
     if (jmDNS != null) {

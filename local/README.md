@@ -9,17 +9,36 @@
 
 ## mqtt
 
-- `apstat` (heartbeat)
+- `apstate` (ap heartbeat)
 
             {
-              "bsid": "ap110",
-              "timestamp": 1478102400,
-              "version": 1.1,
-              "macaddr": "82:e6:50:70:86:00",
-              "temperature": 33.2,
-              "disk": "40%",
-              "mem": "40%",
-              "cpu": "21%"
+                "os_uptime": "13.5 min",
+                "DiskInfo": {
+                    "DiskUsed": "3.7GB",
+                    "DiskUsedPerc": "51%",
+                    "DiskTotal": "7.2GB"
+                },
+                "bsid": "pinky",
+                "features": [
+                    "camera"
+                ],
+                "temp": {
+                    "gpu": "45.6",
+                    "cpu": "45.6"
+                },
+                "ip": "10.8.47.20",
+                "ram": {
+                    "buffcache": "351.0 MB",
+                    "total": "976.0 MB",
+                    "free": "372.0 MB",
+                    "used": "603.0 MB",
+                    "used_perc": "61.8 %"
+                },
+                "mac": "b8:27:eb:2e:72:1a",
+                "version": 1,
+                "cpu_load": "1.6 %",
+                "timestamp": 1482918630,
+                "script_uptime": "0.8 mins"
             }
 
 - `ap` (publish format)
@@ -68,7 +87,7 @@
 
 ## API
 
-- ap list [GET /ap] (working: 0-unknown, 1-normal, -1-disappeared)
+- ap list [GET /ap] `working: 0-unknown, 1-normal, -1-disappeared`
 
               {
                 status: "ok",

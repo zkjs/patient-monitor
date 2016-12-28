@@ -61,7 +61,7 @@ public class CameraConsumer implements PushConsumer {
 
     double distance = recordTrace(ap, apMsg.getRssi(), braceletId);
 
-    if (ap.shotEnabled() || SHOT_RANGE >= distance) {
+    if (ap.shotEnabled() && SHOT_RANGE >= distance) {
       LOG.debug("{} distance: {}, ready to roll", apMsg.getBandId(), distance);
       /* based on ap signals, try to locate and take a photo of the patient */
       cache.push(ap.getId().toHexString(), braceletId, System.currentTimeMillis());
