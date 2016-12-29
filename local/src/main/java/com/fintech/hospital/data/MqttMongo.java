@@ -15,6 +15,7 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -37,7 +38,7 @@ public class MqttMongo {
   }
 
   public void close(String name) {
-    mongo.dropCollection(name);
+    mongo.findAllAndRemove(new Query(), name);
   }
 
   public void add(MqttData data, String name) {
@@ -65,7 +66,10 @@ public class MqttMongo {
   );
 
   public List<String> keys(String name) {
-    return mongo.aggregate(Aggregation.newAggregation(GROUP_BY_KEY), name, String.class).getMappedResults();
+    if(mongo.collectionExists(name)) {
+      return mongo.aggregate(Aggregation.newAggregation(GROUP_BY_KEY), name, String.class).getMappedResults();
+    }
+    return new ArrayList<>(0);
   }
 
   public void clear(String name) {
