@@ -210,6 +210,7 @@ public class MongoDB {
     Update update = new Update()
         .set("stat", apStatus)
         .set("mac", apStatus.getMac())
+        .set("status", 1)
         .set("update_on", new Date());
     if(apStatus.getFeatures().contains("camera")){
       update.set("camera", 1);
