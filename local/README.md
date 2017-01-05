@@ -46,7 +46,8 @@
             {
               "ap": "ap110",
               "bracelet": "00",
-              "cmd":
+              "cmd": "capture",
+              "url": "http://127.0.0.1/photo/110?bracelets=00&time="
             }
 
 - `nursecall` (publish format)

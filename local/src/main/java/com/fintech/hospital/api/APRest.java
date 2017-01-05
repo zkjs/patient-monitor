@@ -54,11 +54,4 @@ public class APRest {
     return "{\"status\": \"err\", \"error\": \"only cameras can be triggered\"}";
   }
 
-//  public static void main(String[] args) {
-//    String a = "{\"apid\": \"581b1a6542aa101eebc77e61\"}";
-//    String b = "{\"camera\":\"1\",\"apid\":\"585b93bfa964c77d3f75a0c5\",\"triggers\":[\"585b93bfa964c77d3f75a0c5\",\"5860c22ce2efbcf6d5e48b4e\"],\"triggerLogic\":\"and\"}";
-//    AP ap = JSON.parseObject(b, AP.class);
-//    System.out.println(ap);
-//  }
-
 }

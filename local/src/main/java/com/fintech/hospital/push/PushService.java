@@ -30,6 +30,12 @@ public class PushService {
   @Value("${ap.cmd.camera}")
   private String CMD_CAMERA;
 
+  @Value("${server.addr}")
+  private String SERVER_ADDR;
+
+  @Value("${server.port}")
+  private String SERVER_PORT;
+
   @Autowired
   @Qualifier("camConsumer")
   private PushConsumer positionConsumer;
@@ -62,6 +68,8 @@ public class PushService {
     shotMsg.put("ap", shotAP);
     shotMsg.put("bracelet", bracelet);
     shotMsg.put("cmd", CMD_CAMERA);
+    shotMsg.put("url", String.format("http://%s:%s/photo/%s?bracelets=%s&time=",
+        SERVER_ADDR, SERVER_PORT, shotAP, bracelet));
     pushSupplier4AP.publish(new PushMsg(AP, shotMsg.toJSONString()));
   }
 
