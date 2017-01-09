@@ -1,6 +1,7 @@
 package com.fintech.hospital.base;
 
 import com.mongodb.MongoClient;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -15,7 +16,6 @@ import javax.annotation.PreDestroy;
 import javax.jmdns.JmDNS;
 import javax.jmdns.ServiceInfo;
 import java.net.Inet4Address;
-import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.util.ArrayList;
@@ -60,7 +60,7 @@ public class AppConfig {
     return new MongoTemplate(client, dbname);
   }
 
-  private JmDNS jmDNS;
+  private List<JmDNS> jmDNSList = new ArrayList<>();
 
   @Value("${svr.mqtt.port}")
   private int MQTT_PORT;
@@ -68,48 +68,58 @@ public class AppConfig {
   @Value("${server.port}")
   private int HTTP_PORT;
 
+  @Value("${server.addr}")
+  private String HOST_ADDR;
+
   /**
    * suppose that the mqtt server is on the same machine
    */
   @PostConstruct
   private void multicastMqttServerAddr() {
     try {
-      List<InetAddress> addresses = new ArrayList<>();
-      Enumeration<NetworkInterface> interfaces = getNetworkInterfaces();
-      while (interfaces.hasMoreElements()) {
-        Enumeration<InetAddress> interfaceInets = interfaces.nextElement().getInetAddresses();
-        while (interfaceInets.hasMoreElements()) {
-          addresses.add(interfaceInets.nextElement());
+      if (StringUtils.isNotBlank(HOST_ADDR)) {
+        registerServices(InetAddress.getByName(HOST_ADDR));
+      } else {
+        List<InetAddress> addresses = new ArrayList<>();
+        Enumeration<NetworkInterface> interfaces = getNetworkInterfaces();
+        while (interfaces.hasMoreElements()) {
+          Enumeration<InetAddress> interfaceInets = interfaces.nextElement().getInetAddresses();
+          while (interfaceInets.hasMoreElements()) {
+            addresses.add(interfaceInets.nextElement());
+          }
         }
+        addresses.stream().filter(a ->
+            a instanceof Inet4Address
+                && (a.isLinkLocalAddress() || a.isSiteLocalAddress() || a.isLoopbackAddress())
+        ).forEach(this::registerServices);
       }
-      addresses.stream().filter(a->
-          a instanceof Inet4Address
-          && (a.isLinkLocalAddress() || a.isSiteLocalAddress() || a.isLoopbackAddress())
-      ).forEach(address -> {
-        try {
-          jmDNS = JmDNS.create(address);
-          ServiceInfo mqttSvr = ServiceInfo.create("_mqtt", "fintech mqtt", MQTT_PORT, "");
-          ServiceInfo httpSvr = ServiceInfo.create("_http", "fintech http", HTTP_PORT, "");
-          jmDNS.registerService(mqttSvr);
-          LOG.info("registered mqtt service on {}:{}", address, MQTT_PORT);
-          jmDNS.registerService(httpSvr);
-          LOG.info("registered http service on {}:{}", address, HTTP_PORT);
-        } catch (Exception e) {
-          LOG.warn("failed to register service on {}: ", address, e);
-        }
-      });
 
     } catch (Exception e) {
       LOG.warn("failed to broadcast mqtt/http service to local LAN:", e);
     }
   }
 
+  private void registerServices(InetAddress address) {
+    try {
+      JmDNS jmDNS = JmDNS.create(address);
+      ServiceInfo mqttSvr = ServiceInfo.create("_mqtt", "fintech mqtt", MQTT_PORT, "");
+      ServiceInfo httpSvr = ServiceInfo.create("_http", "fintech http", HTTP_PORT, "");
+      jmDNS.registerService(mqttSvr);
+      LOG.info("registered mqtt service on {}:{}", address, MQTT_PORT);
+      jmDNS.registerService(httpSvr);
+      LOG.info("registered http service on {}:{}", address, HTTP_PORT);
+      jmDNSList.add(jmDNS);
+    } catch (Exception e) {
+      LOG.warn("failed to register service on {}: ", address, e);
+    }
+  }
+
   @PreDestroy
   private void unregistermDNSSvrs() {
     LOG.trace("trying to unregister mdns services");
-    if (jmDNS != null) {
+    if (jmDNSList != null) {
       LOG.info("un-register multicast dns services...");
-      jmDNS.unregisterAllServices();
+      jmDNSList.forEach(JmDNS::unregisterAllServices);
     }
   }
 
